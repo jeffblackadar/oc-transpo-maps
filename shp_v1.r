@@ -33,8 +33,6 @@ dbListTables(routesDb)
 #dbWriteTable(routesDb, value = sampleRouteData, row.names = FALSE, name = "tbl_route_maps", append = TRUE ) 
 
 # *** "One time" data load from SHP files
-
-
 output_query<-paste("select * from tbl_route_maps where true",sep='')
 output_rs = dbSendQuery(routesDb,output_query)
 output_dbRows<-dbFetch(output_rs, 999999)
@@ -89,6 +87,8 @@ ottawaMap
 #formerTownships <- fortify(formerTownships)
 #ottawaMap <- ottawaMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color='purple', data=formerTownships, alpha=0)
 
+#-------------
+# Single route plotted
 route <- readOGR(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps\\route-maps\\1929_Routes", layer = "BusRoute_Crosstown_1929")
 #spTransform allows us to convert and transform between different mapping projections and datums.
 #Credit to https://www.r-bloggers.com/shapefile-polygons-plotted-on-google-maps-using-ggmap-in-r-throw-some-throw-some-stats-on-that-mappart-2/
@@ -99,7 +99,58 @@ transitMap <- ottawaMap + geom_polygon(aes(x=long, y=lat, group=group), fill='gr
 transitMap
 
 
+
+#--------------
+
+transitMap <- ottawaMap
+
+output_query<-paste("select * from tbl_route_maps where YEAR=1939",sep='')
+output_rs = dbSendQuery(routesDb,output_query)
+output_dbRows<-dbFetch(output_rs, 999999)
+if (nrow(output_dbRows)==0){
+  print (paste("Problem: zero rows for ",output_query,sep=''))
+} else {
+  for (i in 1:nrow(output_dbRows)) {
+    print(output_dbRows[i, 1])
+    print(output_dbRows[i, 2])
+    dsn_temp<-paste("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps\\route-maps\\",output_dbRows[i, 3],sep='')
+    dsn_temp
+    layer_temp = gsub(" ","",gsub(".shp","",output_dbRows[i, 2]))
+    layer_temp
+    route <- readOGR(dsn = dsn_temp, layer = layer_temp)
+    
+    route <- spTransform(route, CRS("+proj=longlat +datum=WGS84"))
+    
+    route <- fortify(route)
+    
+    routeColor<-'green'  
+    if(output_dbRows[i, 8]=="Suburban Car Line"){
+      routeColor<-'purple'  
+    }else {
+      if(output_dbRows[i, 8]=="City Car Line"){
+        routeColor<-'red'  
+      }
+    }
+    
+    #transitMap <- transitMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color=routeColor, data=route, alpha=0)
+    transitMap <- transitMap + geom_path(data=route, mapping=aes(x=long, y=lat, group=group), size=1, linejoin="round", color=routeColor)
+  }
+}
+
+#plot(route,col="coral4", lwd=2)
+transitMap
+summary(route)
+
+long
+
+#transitMap$plot_env$legend
+transitMap <- ottawaMap
+transitMap <- transitMap + geom_path(aes(x=long, y=lat, fill = "red", colour = "red"), size=1, shape = 1, data=route )
+transitMap <- transitMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color=routeColor, data=route, alpha=0)
+transitMap
 #plot(shape)
+
+
 
 #require(sf)
 #shape <- read_sf(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps\\route-maps\\1929_Routes", layer = "BusRoute_Crosstown_1929")
