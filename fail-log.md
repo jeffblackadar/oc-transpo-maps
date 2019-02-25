@@ -72,6 +72,14 @@ database=oc_transpo_maps
 ```
 # Loading the database with information from the ShapeFiles
 
+## Side effect for Git
+Downloading all the Shapefiles resulted in anout 40k of files being added to the Git index.
+This slowed things down badly, and we did not need these, so I removed them from the index
+
+```
+ git rm route-maps -r -f
+```
+
 ## Get all of the shp files
 ```
 C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps\\route-maps>for /r %i in (*.shp) do @echo %~pnxi
@@ -104,4 +112,4 @@ sampleRouteData <- read.csv(file="C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-
 sampleRouteData
 dbWriteTable(routesDb, value = sampleRouteData, row.names = FALSE, name = "tbl_route_maps", append = TRUE ) 
 ```
-
+Row 3800  RTE_184_Limited Service_2002  - does not load
