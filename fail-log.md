@@ -113,3 +113,66 @@ sampleRouteData
 dbWriteTable(routesDb, value = sampleRouteData, row.names = FALSE, name = "tbl_route_maps", append = TRUE ) 
 ```
 Row 3800  RTE_184_Limited Service_2002  - does not load
+
+### RTE_TYPEs
+
+Here are the RTE_TYPES - they are not fully consistent
+
+"4am to 6am only"
+"Bus Line"
+"Bus Route"
+"City Car Line"
+"Demand Responsive Route"
+DemandResponsiveService
+"Early Morning Only"
+"Express Route"
+ExpressRoute
+GreenRoute
+"Limited Service"
+"Limited Stops Route"
+LimitedService
+"Main Route - Regular"
+"Main Route - Rush Hour"
+"Motor Coach Route"
+OffPeak
+OffPeakService
+"Other Through Route - Regular"
+"Other Through Route - Rush Hour"
+OTRAIN
+Peak
+"Peak Hour Extension"
+"Peak Route"
+PeakHourExtension
+PeakPeriod
+PeakPeriodExtension
+PeakPeriodRoute
+PeakPeriodService
+PeakRoute
+RedRoute
+"Regular Route"
+RegularRoute
+"Rural Express Route"
+"Rural Shopping Route"
+RuralExpressRoute
+"Rush Hour Bus Route"
+"Street Car Route"
+"Suburban Car Line"
+"Sunday Only Route"
+"Sunday Service Route"
+SundayOnly
+"Transfer Route - Regular"
+"Transfer Route - Rush Hour"
+"Trolley Bus Route"
+
+I will add to the data import program to groom these
+
+```
+CREATE TABLE `tbl_route_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `RTE_TYPE` varchar(50) DEFAULT NULL,
+  `RTE_TYPE_MODE` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+This query provides a useful view of the years when the route types were in use.
+select RTE_TYPE, min(YEAR), max(YEAR) from oc_transpo_maps.tbl_route_maps GROUP BY RTE_TYPE order by RTE_TYPE;

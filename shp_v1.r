@@ -76,7 +76,7 @@ setwd("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps\\")
 #centerOfMap <- geocode("Ottawa, ON")
 #45.41117, -75.69812
 
-#ottawa <- get_map(c(lon=centerOfMap$lon, lat=centerOfMap$lat),zoom = 12, maptype = "terrain", source = "stamen")
+ottawa <- get_map(c(lon=centerOfMap$lon, lat=centerOfMap$lat),zoom = 12, maptype = "terrain", source = "stamen")
 ottawa <- get_map(c(lon=-75.69812, lat=45.41117),zoom = 12, maptype = "terrain", source = "stamen")
 ottawaMap <- ggmap(ottawa)
 ottawaMap
@@ -127,16 +127,19 @@ if (nrow(output_dbRows)==0){
     route <- fortify(route)
     
     routeColor<-'green'  
+    routeSize<-.4
     if(output_dbRows[i, 8]=="Suburban Car Line" | output_dbRows[i, 8]=="Express Route"){
       routeColor<-'purple'  
+      routeSize<-2
     }else {
       if(output_dbRows[i, 8]=="City Car Line" | output_dbRows[i, 8]=="Peak Route"){
         routeColor<-'red'  
+        routeSize<-1
       }
     }
     
     #transitMap <- transitMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color=routeColor, data=route, alpha=0)
-    transitMap <- transitMap + geom_path(data=route, mapping=aes(x=long, y=lat, group=group), size=1, linejoin="round", color=routeColor)
+    transitMap <- transitMap + geom_path(data=route, mapping=aes(x=long, y=lat, group=group), size=routeSize, linejoin="round", color=routeColor)
   }
 }
 
