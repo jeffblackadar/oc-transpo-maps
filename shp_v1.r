@@ -27,6 +27,7 @@ citation("RMariaDB")
 library(svglite)
 citation("svglite")
 
+library(plyr)
 # R needs a full path to find the settings file.
 rmariadb.settingsfile<-"C:\\ProgramData\\MySQL\\MySQL Server 8.0\\oc_transpo_maps.cnf"
 
@@ -99,23 +100,23 @@ ottawaMap
 
 #-------------
 # Single route plotted
-route <- readOGR(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\2015_Routes", layer = "RTE_001_RegularRoute_2015")
+#route <- readOGR(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\2015_Routes", layer = "RTE_001_RegularRoute_2015")
 #spTransform allows us to convert and transform between different mapping projections and datums.
 #Credit to https://www.r-bloggers.com/shapefile-polygons-plotted-on-google-maps-using-ggmap-in-r-throw-some-throw-some-stats-on-that-mappart-2/
 
 
-route <- spTransform(route, CRS("+proj=longlat +datum=WGS84"))
+#route <- spTransform(route, CRS("+proj=longlat +datum=WGS84"))
 
-route <- fortify(route)
-transitMap <- ottawaMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color='green', data=route, alpha=0)
-transitMap
+#route <- fortify(route)
+#transitMap <- ottawaMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color='green', data=route, alpha=0)
+#transitMap
 
 
 
 #--------------
 
 transitMap <- ottawaMap
-mapYear="1929"
+mapYear="1962"
 output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE = tbl_route_types.RTE_TYPE WHERE YEAR=",mapYear," ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
 output_rs = dbSendQuery(routesDb,output_query)
 output_dbRows<-dbFetch(output_rs, 999999)
@@ -132,15 +133,34 @@ if (nrow(output_dbRows)==0){
     route <- readOGR(dsn = dsn_temp, layer = layer_temp)
     
     route <- spTransform(route, CRS("+proj=longlat +datum=WGS84"))
+    #slotNames(route)
+    #route@data
     
+    #Correct for any non-standard names in the dataframe.
+    #Do this when the data is loaded.
+    routeDataDf<-route@data
+    if(colnames(route@data)[3]=="Mode"){
+      routeDataDf<-rename(routeDataDf, c("Mode"="MODE"))
+    } else {
+      if(colnames(route@data)[3]=="mode"){
+    routeDataDf<-rename(routeDataDf, c("mode"="MODE"))
+      }
+    }
+    if(colnames(route@data)[2]=="RTE_Type"){
+      routeDataDf<-rename(routeDataDf, c("RTE_Type"="RTE_TYPE"))
+    } 
+    #summary(route)
+    route@data<-routeDataDf
+    #summary(route)
+
+     if(i==1) {
+       routesDf <- route
+     }else{
+       routesDf <- rbind(routesDf,route)
+     }
     routeDf <- fortify(route)
-    # if(i==1) {
-    #   routesDf <- routeDf
-    # }else{
-    #   routesDf <- rbind(routesDf,routeDf)
-    # }
-    route_mode_code = output_dbRows[i, 7]
     
+    route_mode_code = output_dbRows[i, 7]
     routeColor<-'green'  
     routeSize<-.5    
 
@@ -188,22 +208,23 @@ mapTheme <- theme(plot.title = element_text(family = "Helvetica", face = "bold",
                       axis.text = element_text(family = "Courier", colour = "cornflowerblue", size = (10)))
 
 transitMap<-transitMap+mapTheme+ggtitle(paste0("Ottawa Transit Map for ",mapYear))
-transitMap$labels$subtitle="Subtitle"
+transitMap$labels$subtitle=""
 #transitMap<-transitMap+scale_color(c("green","red","blue"), breaks=c(1,2,3), labels=c("Regular","Peak","Train"))
-transitMap$plot_env$legend.title="k"
-transitMap$plot_env$legend.text="hh"
+#transitMap$plot_env$legend.title="k"
+#transitMap$plot_env$legend.text="hh"
 #transitMap$plot_env$
 transitMap
-ggsave(filename="test.svg",plot=image,width=10,height=8,units="cm")
+#ggsave(filename="test.svg",plot=image,width=10,height=8,units="cm")
 #landUse <- readOGR(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\Urban_Growth", layer = "UrbanGrowth_AllYears")
 #landUse <- spTransform(landUse, CRS("+proj=longlat +datum=WGS84"))
 #landUse <- fortify(landUse)
 #transitMap <- transitMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color='green', data=landUse, alpha=0)
 #transitMap
 
-writeOGR(obj=transitMap,dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\", layer = "2015_map", driver="ESRI Shapefile")
+rgdal::writeOGR(obj=routesDf,dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps", layer = paste0(mapYear,"_map"), driver="ESRI Shapefile",overwrite_layer=TRUE)
 
-summary(routesDf)
+route@lines
+?#summary(routesDf)
 
 #transitMap$plot_env$legend
 #transitMap <- ottawaMap
