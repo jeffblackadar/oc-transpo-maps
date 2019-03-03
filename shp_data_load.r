@@ -27,6 +27,12 @@ dbListTables(routesDb)
 #sampleRouteData
 #dbWriteTable(routesDb, value = sampleRouteData, row.names = FALSE, name = "tbl_route_maps", append = TRUE ) 
 
+#routeTypes <- read.csv(file="C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\RTE_TYPE_raw.csv", header=TRUE, sep=",")
+#routeTypes
+#dbWriteTable(routesDb, value = routeTypes, row.names = FALSE, name = "tbl_route_types", append = TRUE ) 
+
+
+
 # *** "One time" data load from SHP files
 output_query<-paste("select * from tbl_route_maps where true",sep='')
 output_rs = dbSendQuery(routesDb,output_query)
@@ -106,29 +112,32 @@ groom_RTE_TYPE <- function(bad_RTE_TYPE, good_RTE_TYPE) {
 
 #groom_RTE_TYPE("4am to 6am only","Early Morning Only",routesDb)
 #groom_RTE_TYPE("DemandResponsiveService","Demand Responsive Route",routesDb)
-groom_RTE_TYPE("ExpressRoute","Express Route")
-groom_RTE_TYPE("Limited Stops Route","Limited Service")
-groom_RTE_TYPE("LimitedService","Limited Service")
-groom_RTE_TYPE("OffPeakService","Off Peak Service")
-groom_RTE_TYPE("OffPeak","Off Peak Service")
-groom_RTE_TYPE("Peak","Peak Period Route")
-groom_RTE_TYPE("PeakHourExtension","Peak Period Extension")
-groom_RTE_TYPE("PeakPeriod","Peak Period Route")
-groom_RTE_TYPE("PeakPeriodExtension","Peak Period Extension")
-groom_RTE_TYPE("PeakPeriodRoute","Peak Period Route")
-groom_RTE_TYPE("PeakPeriodService","Peak Period Route")
-groom_RTE_TYPE("PeakRoute","Peak Period Route")
-groom_RTE_TYPE("GreenRoute","Green Route")
-groom_RTE_TYPE("RedRoute","Red Route")
+# groom_RTE_TYPE("ExpressRoute","Express Route")
+# groom_RTE_TYPE("Limited Stops Route","Limited Service")
+# groom_RTE_TYPE("LimitedService","Limited Service")
+# groom_RTE_TYPE("OffPeakService","Off Peak Service")
+# groom_RTE_TYPE("OffPeak","Off Peak Service")
+# groom_RTE_TYPE("Peak","Peak Period Route")
+# groom_RTE_TYPE("PeakHourExtension","Peak Period Extension")
+# groom_RTE_TYPE("PeakPeriod","Peak Period Route")
+# groom_RTE_TYPE("PeakPeriodExtension","Peak Period Extension")
+# groom_RTE_TYPE("PeakPeriodRoute","Peak Period Route")
+# groom_RTE_TYPE("PeakPeriodService","Peak Period Route")
+# groom_RTE_TYPE("PeakRoute","Peak Period Route")
+# groom_RTE_TYPE("GreenRoute","Green Route")
+# groom_RTE_TYPE("RedRoute","Red Route")
+# 
+# groom_RTE_TYPE("RegularRoute","Regular Route")
+# 
+# 
+# groom_RTE_TYPE("RuralExpressRoute","Rural Express Route")
+# groom_RTE_TYPE("Rush Hour Bus Route","Peak Period Route")
+# groom_RTE_TYPE("Peak Route","Peak Period Route")
+# 
+# groom_RTE_TYPE("SundayOnly","Sunday Only Route")
+groom_RTE_TYPE("","Blank")
+groom_RTE_TYPE(NULL,"Blank")
 
-groom_RTE_TYPE("RegularRoute","Regular Route")
-
-
-groom_RTE_TYPE("RuralExpressRoute","Rural Express Route")
-groom_RTE_TYPE("Rush Hour Bus Route","Peak Period Route")
-groom_RTE_TYPE("Peak Route","Peak Period Route")
-
-groom_RTE_TYPE("SundayOnly","Sunday Only Route")
 
 
 

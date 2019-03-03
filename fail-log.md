@@ -169,10 +169,41 @@ I will add to the data import program to groom these
 ```
 CREATE TABLE `tbl_route_types` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `RTE_TYPE` varchar(50) DEFAULT NULL,
-  `RTE_TYPE_MODE` varchar(50) DEFAULT NULL,
+  `RTE_TYPE` varchar(50) DEFAULT "",
+  `RTE_TYPE_MODE` varchar(50) DEFAULT "",
+  `RTE_TYPE_MODE_CODE` int(11) DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 This query provides a useful view of the years when the route types were in use.
 select RTE_TYPE, min(YEAR), max(YEAR) from oc_transpo_maps.tbl_route_maps GROUP BY RTE_TYPE order by RTE_TYPE;
+
+#Thank you
+#http://www.sthda.com/english/wiki/colors-in-r
+
+# Generate a plot of color names which R knows about.
+#++++++++++++++++++++++++++++++++++++++++++++
+# cl : a vector of colors to plots
+# bg: background of the plot
+# rot: text rotation angle
+#usage=showCols(bg="gray33")
+showCols <- function(cl=colors(), bg = "grey",
+                     cex = 0.75, rot = 30) {
+  m <- ceiling(sqrt(n <-length(cl)))
+  length(cl) <- m*m; cm <- matrix(cl, m)
+  require("grid")
+  grid.newpage(); vp <- viewport(w = .92, h = .92)
+  grid.rect(gp=gpar(fill=bg))
+  grid.text(cm, x = col(cm)/m, y = rev(row(cm))/m, rot = rot,
+            vp=vp, gp=gpar(cex = cex, col = cm))
+}
+showCols(bg="gray33")
+
+These don't work for me
+
+```
+# Write image to file
+ggsave(filename="test.svg",plot=image,width=10,height=8,units="cm")
+
+writeOGR(obj=transitMap,dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\", layer = "2015_map", driver="ESRI Shapefile")
+```
