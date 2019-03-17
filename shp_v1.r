@@ -1,3 +1,4 @@
+#install.packages("RMariaDB")
 #install.packages("rgdal")
 #install.packages("sf")
 #install.packages("ggmap")
@@ -10,22 +11,22 @@
 #register_google(key = "hhh")
 
 library(ggmap)
-citation("ggmap")
+#citation("ggmap")
 
 library(RgoogleMaps)
-citation("RgoogleMaps")
+#citation("RgoogleMaps")
 
 library(ggplot2)
-citation("ggplot2")
+#citation("ggplot2")
 
 require(rgdal)
-citation("rgdal")
+#citation("rgdal")
 
 library(RMariaDB)
-citation("RMariaDB")
+#citation("RMariaDB")
 
-library(svglite)
-citation("svglite")
+#library(svglite)
+#citation("svglite")
 
 library(plyr)
 # R needs a full path to find the settings file.
@@ -214,6 +215,8 @@ transitMap$labels$subtitle=""
 #transitMap$plot_env$legend.text="hh"
 #transitMap$plot_env$
 transitMap
+
+
 #ggsave(filename="test.svg",plot=image,width=10,height=8,units="cm")
 #landUse <- readOGR(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\Urban_Growth", layer = "UrbanGrowth_AllYears")
 #landUse <- spTransform(landUse, CRS("+proj=longlat +datum=WGS84"))

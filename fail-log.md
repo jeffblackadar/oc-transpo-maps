@@ -44,14 +44,17 @@ USE oc_transpo_maps;
 
 CREATE TABLE `tbl_route_maps` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `RTE_SHP_FILE_NAME` varchar(50) DEFAULT NULL,
-  `RTE_SHP_FILE_FOLDER` varchar(50) DEFAULT NULL,
-  `RTE_NAME` varchar(99) DEFAULT NULL,
-  `RTE_YEAR` int(11) DEFAULT NULL,
-  `RTE_MODE` varchar(50) DEFAULT NULL,
-  `RTE_TYPE` varchar(50) DEFAULT NULL,
+  `RTE_SHP_FILE_NAME` varchar(99) DEFAULT NULL COMMENT 'The file name of the shapefile to be loaded.',
+  `RTE_SHP_FILE_FOLDER` varchar(50) DEFAULT NULL COMMENT 'The folder name of the shapefile to be loaded.',
+  `YEAR` int(11) DEFAULT NULL COMMENT 'The year of the shapefile''s data',
+  `RTE_NAME` varchar(99) DEFAULT NULL COMMENT 'The route name.',
+  `RTE_NUM` varchar(99) DEFAULT NULL COMMENT 'The route number.',
+  `Mode` varchar(50) DEFAULT NULL COMMENT 'The Mode of the route. (Street Car)',
+  `RTE_TYPE` varchar(50) DEFAULT NULL COMMENT 'The route type. This is the original data from the shapefiles.',
+  `RTE_TYPE_GROOMED` varchar(50) DEFAULT NULL COMMENT 'The route type. This is modified or groomed data from the shapefiles for more consistency during differnet years.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5793 DEFAULT CHARSET=utf8 COMMENT='Contains the list of shapefiles and their attributes so that they can be queried to generate maps from data that matches the query.';
+
 
 
 CREATE USER 'oc_maps_user'@'localhost' IDENTIFIED BY '---a-password---';
@@ -113,6 +116,7 @@ sampleRouteData
 dbWriteTable(routesDb, value = sampleRouteData, row.names = FALSE, name = "tbl_route_maps", append = TRUE ) 
 ```
 Row 3800  RTE_184_Limited Service_2002  - does not load
+-- This was an initial problem.  It was solved. (see below.)
 
 ### RTE_TYPEs
 
@@ -207,3 +211,25 @@ ggsave(filename="test.svg",plot=image,width=10,height=8,units="cm")
 
 writeOGR(obj=transitMap,dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\", layer = "2015_map", driver="ESRI Shapefile")
 ```
+### Problem loading RTE_184_Limited Service_2002
+I had a problem loading RTE_184_Limited Service_2002
+It has a space in it and the space was being removed when I did
+layer_temp = gsub(" ","",gsub(".shp","",output_dbRows[i, 2]))
+in the data load on line 49.  I was replacing spacec because I loaded the data with trailing spaces.  I should have removed the whitespace on load (and will)
+
+"RTE_184_LimitedService_2002"
+
+### Geojson
+I may want to write out geojson for my project
+I see some good information here
+https://github.com/Robinlovelace/Creating-maps-in-R/blob/master/vignettes/geoJSON.Rmd
+
+
+### Empty modes
+SELECT * FROM oc_transpo_maps.tbl_route_maps WHERE MODE = "";
+63	RTE_023_TrolleyBusRoute_1951.shp	1951_Routes	1951		023		Trolley Bus Route
+98	RTE_023_MotorCoachRoute_1954.shp	1954_December	1954		023		Motor Coach Route
+99	RTE_023_TrolleyBusRoute_1954.shp	1954_December	1954		023		Trolley Bus Route
+132	RTE_026_TrolleyBusRoute_1954.shp	1954_June	1954		026		Trolley Bus Route
+
+SELECT * FROM oc_transpo_maps.tbl_route_maps WHERE RTE_TYPE = "";

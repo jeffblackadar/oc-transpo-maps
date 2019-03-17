@@ -4,6 +4,8 @@ require(rgdal)
 library(RMariaDB)
 #citation("RMariaDB")
 
+library(plyr)
+
 # R needs a full path to find the settings file.
 rmariadb.settingsfile<-"C:\\ProgramData\\MySQL\\MySQL Server 8.0\\oc_transpo_maps.cnf"
 
@@ -14,7 +16,7 @@ routesDb<-dbConnect(RMariaDB::MariaDB(),default.file=rmariadb.settingsfile,group
 dbListTables(routesDb)
 
 # *** "One time" data load
-#sampleRouteData <- read.csv(file="C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps\\shp.csv", header=TRUE, strip.white=TRUE, sep=",")
+#sampleRouteData <- read.csv(file="C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\oc-shps.csv", header=TRUE, strip.white=TRUE, sep=",")
 #sampleRouteData
 #dbWriteTable(routesDb, value = sampleRouteData, row.names = FALSE, name = "tbl_route_maps", append = TRUE ) 
 
@@ -22,10 +24,39 @@ dbListTables(routesDb)
 #routeTypes
 #dbWriteTable(routesDb, value = routeTypes, row.names = FALSE, name = "tbl_route_types", append = TRUE ) 
 
+#Look at empty modes
+#63	RTE_023_TrolleyBusRoute_1951.shp	1951_Routes	1951		023		Trolley Bus Route
+#98	RTE_023_MotorCoachRoute_1954.shp	1954_December	1954		023		Motor Coach Route
+#99	RTE_023_TrolleyBusRoute_1954.shp	1954_December	1954		023		Trolley Bus Route
+#132	RTE_026_TrolleyBusRoute_1954.shp	1954_June	1954		026		Trolley Bus Route
+
+#Look at empty RTE_TYPES
+#11	BusRoute_Crerar_1939.shp	1939_Routes	1939	Crerar		Bus	
+#22	BusRoute_Crerar_1948.shp	1948_Routes	1948	Crerar		Bus	
+#5381	RTE_094_RegularRoute_2014.shp	2014_Routes	2014		094	Bus	
+#5390	RTE_099_RegularRoute_2014.shp	2014_Routes	2014		099	Bus	
+
+dsn_temp<-paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\","1954_June")
+dsn_temp
+layer_temp = gsub(".shp","","RTE_026_TrolleyBusRoute_1954.shp")
+layer_temp
+route <- readOGR(dsn = dsn_temp, layer_temp)
+route@data
+
+dsn_temp<-paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\","1948_Routes")
+dsn_temp
+layer_temp = gsub(".shp","","BusRoute_Crerar_1948.shp")
+layer_temp
+route <- readOGR(dsn = dsn_temp, layer_temp)
+route@data
+colnames(route@data)
+
 
 
 # *** "One time" data load from SHP files
 output_query<-paste("select * from tbl_route_maps where true",sep='')
+#Use statement below to update a specific year
+#output_query<-paste("select * from tbl_route_maps where YEAR=1954",sep='')
 output_rs = dbSendQuery(routesDb,output_query)
 output_dbRows<-dbFetch(output_rs, 999999)
 if (nrow(output_dbRows)==0){
@@ -41,18 +72,35 @@ if (nrow(output_dbRows)==0){
     layer_temp
     route <- readOGR(dsn = dsn_temp, layer_temp)
     
+    #Correct for any non-standard names in the dataframe.
+    #Do this when the data is loaded.
+    routeDataDf<-route@data
+    if("Mode" %in% colnames(route@data)){
+      routeDataDf<-plyr::rename(routeDataDf, c("Mode"="MODE"))
+    } else {
+      if("mode" %in% colnames(route@data)){
+        routeDataDf<-plyr::rename(routeDataDf, c("mode"="MODE"))
+      }
+    }
+    if("RTE_Type" %in% colnames(route@data)){
+      routeDataDf<-plyr::rename(routeDataDf, c("RTE_Type"="RTE_TYPE"))
+    } 
+    #summary(route)
+    route@data<-routeDataDf
+    
     output_query<-""
     
-    output_query_2<-paste(", RTE_TYPE='",paste(route$RTE_TYPE[1],sep=""), "', Mode='",paste(route$Mode[1],sep=""), "'",sep="")
+    output_query_2<-paste0(", RTE_TYPE='",paste0(route$RTE_TYPE[1]), "', RTE_TYPE_GROOMED='",paste0(route$RTE_TYPE[1]), "', MODE='",paste0(route$MODE[1]), "'")
     
     if (route$YEAR[1]==1929 | route$YEAR[1]==1939 | route$YEAR[1]==1948) {
-      output_query<-paste("UPDATE tbl_route_maps set YEAR=",paste(route$YEAR[1],sep=""), ", RTE_NAME='",paste(route$RTE_NAME[1],sep=""),"'", output_query_2, " WHERE id=",output_dbRows[i, 1],sep='')
+      output_query<-paste0("UPDATE tbl_route_maps set YEAR=",paste0(route$YEAR[1]), ", RTE_NAME='",paste0(route$RTE_NAME[1]),"'", output_query_2, " WHERE id=",output_dbRows[i, 1])
     }
     else{
-      output_query<-paste("UPDATE tbl_route_maps set YEAR=",paste(route$YEAR[1],sep=""), ", RTE_NUM='",paste(route$RTE_NUM[1],sep=""),"'",  output_query_2, " WHERE id=",output_dbRows[i, 1],sep='')
-      #output_query
+      output_query<-paste0("UPDATE tbl_route_maps set YEAR=",paste0(route$YEAR[1]), ", RTE_NUM='",paste0(route$RTE_NUM[1]),"'",  output_query_2, " WHERE id=",output_dbRows[i, 1])
+      
     }    
     if(nchar(output_query)>1) {
+      output_query
       output_rs = dbSendQuery(routesDb,output_query)
     }
   }
@@ -76,7 +124,7 @@ groom_RTE_TYPE <- function(bad_RTE_TYPE, good_RTE_TYPE) {
   # list the table. This confirms we connected to the database.
   dbListTables(db_RTE_TYPE)
     
-  groom_query<-paste0("select id, RTE_SHP_FILE_NAME, RTE_TYPE from tbl_route_maps where RTE_TYPE='",bad_RTE_TYPE,"'")
+  groom_query<-paste0("select id, RTE_SHP_FILE_NAME, RTE_TYPE_GROOMED from tbl_route_maps where RTE_TYPE_GROOMED='",bad_RTE_TYPE,"'")
   groom_query_rs = dbSendQuery(db_RTE_TYPE,groom_query)
   groom_dbRows<-dbFetch(groom_query_rs, 999999)
   
@@ -89,7 +137,7 @@ groom_RTE_TYPE <- function(bad_RTE_TYPE, good_RTE_TYPE) {
       
     }
     
-    groom_update_query<-paste0("UPDATE tbl_route_maps set RTE_TYPE='",good_RTE_TYPE,"' WHERE RTE_TYPE='",bad_RTE_TYPE,"'")
+    groom_update_query<-paste0("UPDATE tbl_route_maps set RTE_TYPE_GROOMED='",good_RTE_TYPE,"' WHERE RTE_TYPE_GROOMED='",bad_RTE_TYPE,"'")
     print(groom_update_query)
     groom_rs = dbSendQuery(db_RTE_TYPE,groom_update_query)
     dbHasCompleted(groom_rs)
@@ -102,8 +150,8 @@ groom_RTE_TYPE <- function(bad_RTE_TYPE, good_RTE_TYPE) {
 }
 
 
-#groom_RTE_TYPE("4am to 6am only","Early Morning Only",routesDb)
-#groom_RTE_TYPE("DemandResponsiveService","Demand Responsive Route",routesDb)
+#groom_RTE_TYPE("4am to 6am only","Early Morning Only")
+#groom_RTE_TYPE("DemandResponsiveService","Demand Responsive Route")
 # groom_RTE_TYPE("ExpressRoute","Express Route")
 # groom_RTE_TYPE("Limited Stops Route","Limited Service")
 # groom_RTE_TYPE("LimitedService","Limited Service")
