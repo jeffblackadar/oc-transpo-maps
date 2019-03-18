@@ -199,6 +199,9 @@ if (nrow(output_dbRows)==0){
   }
 }
 
+
+
+
 #plot(route,col="coral4", lwd=2)
 
 #http://environmentalcomputing.net/plotting-with-ggplot-adding-titles-and-axis-names/
@@ -216,7 +219,10 @@ transitMap$labels$subtitle=""
 #transitMap$plot_env$
 transitMap
 
+#Messing around here
+#transitMap <- transitMap + geom_polygon(data=routeUG, mapping=aes(x=long, y=lat, group=group), size=routeSize, fill='grey',  alpha=0, color="red")
 
+#                                       geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color=routeColor, data=route, alpha=0)
 #ggsave(filename="test.svg",plot=image,width=10,height=8,units="cm")
 #landUse <- readOGR(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\Urban_Growth", layer = "UrbanGrowth_AllYears")
 #landUse <- spTransform(landUse, CRS("+proj=longlat +datum=WGS84"))
@@ -224,11 +230,14 @@ transitMap
 #transitMap <- transitMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color='green', data=landUse, alpha=0)
 #transitMap
 
-rgdal::writeOGR(obj=routesDf,dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps", layer = paste0(mapYear,"_map"), driver="ESRI Shapefile",overwrite_layer=TRUE)
+rgdal::writeOGR(obj=routesDf,dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output", layer = paste0(mapYear,"_map"), driver="ESRI Shapefile",overwrite_layer=TRUE)
 
+rgdal::writeOGR(obj=routesDf,dsn = paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,".geojson"), layer = paste0(mapYear,"_map"), driver="GeoJSON",overwrite_layer=TRUE)
 route@lines
 ?#summary(routesDf)
 
+  #writeOGR(inputJSON, "outTest.geojson", layer="inputJSON", driver="GeoJSON",check_exists = FALSE)
+  
 #transitMap$plot_env$legend
 #transitMap <- ottawaMap
 #transitMap <- transitMap + geom_path(aes(x=long, y=lat, fill = "red", colour = "red"), size=1, shape = 1, data=route )

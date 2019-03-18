@@ -233,3 +233,8 @@ SELECT * FROM oc_transpo_maps.tbl_route_maps WHERE MODE = "";
 132	RTE_026_TrolleyBusRoute_1954.shp	1954_June	1954		026		Trolley Bus Route
 
 SELECT * FROM oc_transpo_maps.tbl_route_maps WHERE RTE_TYPE = "";
+
+### Leaflet
+https://github.com/DataVizForAll/leaflet-storymap
+
+Kim Pham, "Web Mapping with Python and Leaflet," The Programming Historian 6 (2017), https://programminghistorian.org/en/lessons/mapping-with-python-leaflet.
