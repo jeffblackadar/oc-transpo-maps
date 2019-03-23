@@ -238,3 +238,10 @@ SELECT * FROM oc_transpo_maps.tbl_route_maps WHERE RTE_TYPE = "";
 https://github.com/DataVizForAll/leaflet-storymap
 
 Kim Pham, "Web Mapping with Python and Leaflet," The Programming Historian 6 (2017), https://programminghistorian.org/en/lessons/mapping-with-python-leaflet.
+
+# Data grooming RTE_RUM
+```
+RTE_RUM   RTE_TYPE MODE YEAR
+0      152 Peak Route  Bus 2000
+C:\a_orgs\carleton\hist3814\R\oc-transpo-maps-data\route-maps\2000_Routes\RTE_152_PeakRoute_2000.shp
+```

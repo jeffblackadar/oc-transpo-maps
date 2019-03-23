@@ -9,6 +9,38 @@ routesDb<-dbConnect(RMariaDB::MariaDB(),default.file=rmariadb.settingsfile,group
 # list the table. This confirms we connected to the database.
 dbListTables(routesDb)
 
+
+#Generate links
+pageLinks="";
+for (generateYear in 1929:2015){
+  
+  print(paste0("Making links for year ", generateYear))
+  
+  #There are 2 files for 1954, so do this twice for June and Dec.
+  mapYear=generateYear
+  output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE YEAR=",mapYear," ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+  #A kluge to use 1953, but worth it to avoid complexity
+  if(generateYear==1953){
+    mapYear="1954_June"    
+    output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_June' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+  }
+  if(generateYear==1954){
+    mapYear="1954_December"
+    output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_December' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+  }
+  
+  output_rs = dbSendQuery(routesDb,output_query)
+  output_dbRows<-dbFetch(output_rs, 999999)
+  if (nrow(output_dbRows)==0){
+    dbClearResult(output_rs)
+  } else {
+    pageLinks<-paste0(pageLinks," | <a href='",mapYear,".html'>",mapYear,"</a>")
+    dbClearResult(output_rs)
+  }
+}
+
+
+
 for (generateYear in 1929:2015){
   
   
@@ -34,6 +66,39 @@ for (generateYear in 1929:2015){
     
   } else {
     print(paste0("Generating maps and geojson for year ", mapYear))  
+    #which urban growth year to use?
+    urbanGrowthYear=1925
+    if(generateYear>=1929 & generateYear<1945){
+      urbanGrowthYear=1925  
+    } else {
+      if(generateYear>=1945 & generateYear<1956){
+        urbanGrowthYear=1945  
+      } else {
+        if(generateYear>=1956 & generateYear<1976){
+          urbanGrowthYear=1956  
+        } else {
+          if(generateYear>=1976 & generateYear<1996){
+            urbanGrowthYear=1976  
+          } else {
+            if(generateYear>=1996 & generateYear<2008){
+              urbanGrowthYear=1996  
+            } else {
+              if(generateYear>=2008 & generateYear<2012){
+                urbanGrowthYear=2008  
+              } else {
+                if(generateYear>=2012 & generateYear<2016){
+                  urbanGrowthYear=2012  
+                } else {
+                  #This would be a problem.
+                  urbanGrowthYear=1925              
+                }
+              }
+            }
+          }
+        }
+      }  
+    }
+    
     dbClearResult(output_rs)
     outputFileHtml <- paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,".html")
     outputFileHtmlCon<-file(outputFileHtml, open = "w")
@@ -104,7 +169,7 @@ for (generateYear in 1929:2015){
     writeLines("", outputFileHtmlCon)
     writeLines("      $.ajax({", outputFileHtmlCon)
     writeLines("        type: 'POST',", outputFileHtmlCon)
-    writeLines("        url: 'http://jeffblackadar.ca/oc-transpo/urban_growth_1956.geojson',", outputFileHtmlCon)
+    writeLines(paste0("        url: 'http://jeffblackadar.ca/oc-transpo/urban_growth_",urbanGrowthYear,".geojson',"), outputFileHtmlCon)
     writeLines("        dataType: 'json',", outputFileHtmlCon)
     writeLines("        success: function(response) {", outputFileHtmlCon)
     writeLines("          geojsonLayer = L.geoJson(response);", outputFileHtmlCon)
@@ -112,9 +177,10 @@ for (generateYear in 1929:2015){
     writeLines("            color: 'brown',", outputFileHtmlCon)
     writeLines("            weight: 1", outputFileHtmlCon)
     writeLines("          });", outputFileHtmlCon)
-    writeLines("          geojsonLayer.bindPopup('Urban extent 1956.')", outputFileHtmlCon)
+    #This popup seems to displace the popup for the routes.
+    #writeLines(paste0("          geojsonLayer.bindPopup('Urban extent ",urbanGrowthYear,".')"), outputFileHtmlCon)
     writeLines("          geojsonLayer.addTo(map);", outputFileHtmlCon)
-    writeLines("          controlLayers.addOverlay(geojsonLayer, 'Urban Extent 1956');", outputFileHtmlCon)
+    writeLines(paste0("          controlLayers.addOverlay(geojsonLayer, 'Urban Extent ",urbanGrowthYear,"');"), outputFileHtmlCon)
     writeLines("          map.fitBounds(geojsonLayer.getBounds());", outputFileHtmlCon)
     writeLines("        }", outputFileHtmlCon)
     writeLines("      });", outputFileHtmlCon)
@@ -128,6 +194,7 @@ for (generateYear in 1929:2015){
     writeLines("  </script>", outputFileHtmlCon)
     
     writeLines(paste0("    <h1>Ottawa mass transit routes ",mapYear,"</h1>"), outputFileHtmlCon)
+    writeLines(paste0(pageLinks), outputFileHtmlCon)
     
     writeLines("    </body>", outputFileHtmlCon)
     writeLines("    </html>", outputFileHtmlCon)

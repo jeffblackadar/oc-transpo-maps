@@ -119,7 +119,10 @@ ottawaMap
 transitMap <- ottawaMap
 
 
-for (generateYear in 1929:2015){
+
+
+
+for (generateYear in 1953:1954){
   
   print(paste0("Generating maps and geojson for year ", generateYear))
   
@@ -132,7 +135,7 @@ for (generateYear in 1929:2015){
     output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_June' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
   }
   if(generateYear==1954){
-    mapYear="1954_Dec"
+    mapYear="1954_December"
     output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_December' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
   }
   
@@ -170,6 +173,12 @@ for (generateYear in 1929:2015){
       if("RTE_Type" %in% colnames(route@data)){
         routeDataDf<-plyr::rename(routeDataDf, c("RTE_Type"="RTE_TYPE"))
       } 
+      #To fix
+      #RTE_RUM   RTE_TYPE MODE YEAR
+      #0      152 Peak Route  Bus 2000
+      if("RTE_RUM" %in% colnames(route@data)){
+        routeDataDf<-plyr::rename(routeDataDf, c("RTE_RUM"="RTE_NUM"))
+      }       
       #summary(route)
       route@data<-routeDataDf
       
