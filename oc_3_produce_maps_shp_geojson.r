@@ -122,7 +122,7 @@ transitMap <- ottawaMap
 
 
 
-for (generateYear in 1953:1954){
+for (generateYear in 2002:2015){
   
   print(paste0("Generating maps and geojson for year ", generateYear))
   
@@ -152,7 +152,8 @@ for (generateYear in 1953:1954){
       print(output_dbRows[i, 2])
       dsn_temp<-paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\",output_dbRows[i, 3])
       dsn_temp
-      layer_temp = gsub(" ","",gsub(".shp","",output_dbRows[i, 2]))
+      #"RTE_184_Limited Service_2002.shp"
+      layer_temp = gsub(".shp","",output_dbRows[i, 2])
       layer_temp
       route <- readOGR(dsn = dsn_temp, layer = layer_temp)
       
@@ -262,6 +263,45 @@ for (generateYear in 1953:1954){
     rgdal::writeOGR(obj=routesDf,dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output", layer = paste0(mapYear,"_map"), driver="ESRI Shapefile",overwrite_layer=TRUE)
     
     rgdal::writeOGR(obj=routesDf,dsn = paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,".geojson"), layer = paste0(mapYear,"_map"), driver="GeoJSON",overwrite_layer=TRUE)
+    
+    #Write a geojson for each RTE_TYPE so they can be added to the map individually
+    output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE YEAR=",mapYear," GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    #A kluge to use 1953, but worth it to avoid complexity
+    if(generateYear==1953){
+      mapYear="1954_June"    
+      #output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_June' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+      output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_June' GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    }
+    if(generateYear==1954){
+      mapYear="1954_December"
+      #output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_December' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+      output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_December' GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    }
+    
+    output_rs_route_style = dbSendQuery(routesDb,output_query_route_style)
+    output_dbRows_route_style<-dbFetch(output_rs_route_style, 999999)
+    if (nrow(output_dbRows_route_style)==0){
+      print (paste0("Zero rows for ",mapYear))
+      dbClearResult(output_rs_route_style)
+      
+    } else {
+      
+      for (i_route_style in 1:nrow(output_dbRows_route_style)) {
+        print(paste0("Separate geojson file in year ", mapYear, " for "))
+        print(output_dbRows_route_style[i_route_style, 1])
+        
+        
+        just_RTE_TYPE <- subset(routesDf, RTE_TYPE==output_dbRows_route_style[i_route_style, 1])
+        
+        
+        rgdal::writeOGR(obj=just_RTE_TYPE,dsn = paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,"-",gsub(" ", "-",output_dbRows_route_style[i_route_style, 1]),".geojson"), layer = paste0(mapYear,"-",output_dbRows_route_style[i_route_style, 1],"_map"), driver="GeoJSON",overwrite_layer=TRUE)
+
+      }
+      dbClearResult(output_rs_route_style)
+      
+    }
+    
+    
     dbClearResult(output_rs)
   }
 } 

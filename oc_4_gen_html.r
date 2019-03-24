@@ -41,7 +41,7 @@ for (generateYear in 1929:2015){
 
 
 
-for (generateYear in 1929:2015){
+for (generateYear in 1929:2002){
   
   
   
@@ -127,46 +127,99 @@ for (generateYear in 1929:2015){
     writeLines(paste0("      attribution: '&copy; ",'<a href="http://osm.org/copyright">OpenStreetMap</a>',"contributors'"), outputFileHtmlCon)
     writeLines("    });", outputFileHtmlCon)
     writeLines("", outputFileHtmlCon)
-    writeLines(paste0('    $.getJSON("',mapYear,'.geojson", function(data) {'), outputFileHtmlCon)
+    
+    
+    # We may no longer need to load this big geojson 
+    writeLines(paste0('    $.getJSON("urban_growth_',urbanGrowthYear,'.geojson", function(data) {'), outputFileHtmlCon)
     writeLines('      geojson = L.geoJson(data, {', outputFileHtmlCon)
-    writeLines('        onEachFeature: function(feature, layer) {', outputFileHtmlCon)
-    writeLines('          layer.bindPopup(feature.properties.RTE_NUM + " " + feature.properties.RTE_TYPE);', outputFileHtmlCon)
-    writeLines("          layer.setStyle({", outputFileHtmlCon)
-    writeLines('            weight: 2,', outputFileHtmlCon)
-    writeLines('            opacity: 1', outputFileHtmlCon)
-    writeLines('          });', outputFileHtmlCon)
-    writeLines("          if (feature.properties.RTE_TYPE == 'Main Route - Regular') {", outputFileHtmlCon)
-    writeLines('            layer.setStyle({', outputFileHtmlCon)
-    writeLines("              color: 'red'", outputFileHtmlCon)
-    writeLines("            });", outputFileHtmlCon)
-    writeLines("          } else {", outputFileHtmlCon)
-    writeLines("            if (feature.properties.RTE_TYPE == 'Transfer Route - Regular') {", outputFileHtmlCon)
-    writeLines("              layer.setStyle({", outputFileHtmlCon)
-    writeLines("                color: 'green'", outputFileHtmlCon)
-    writeLines("              });", outputFileHtmlCon)
-    writeLines("            } else {", outputFileHtmlCon)
-    writeLines("              layer.setStyle({", outputFileHtmlCon)
-    writeLines("                color: 'blue'", outputFileHtmlCon)
-    writeLines("              });", outputFileHtmlCon)
-    writeLines("            }", outputFileHtmlCon)
-    writeLines("          }", outputFileHtmlCon)
-    writeLines("        }", outputFileHtmlCon)
+    
+    
+    # writeLines('        onEachFeature: function(feature, layer) {', outputFileHtmlCon)
+    # writeLines('          layer.bindPopup(feature.properties.RTE_NUM + " " + feature.properties.RTE_TYPE);', outputFileHtmlCon)
+    # writeLines("          layer.setStyle({", outputFileHtmlCon)
+    # writeLines('            weight: 2,', outputFileHtmlCon)
+    # writeLines('            opacity: 1', outputFileHtmlCon)
+    # writeLines('          });', outputFileHtmlCon)
+
+
+    # output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE YEAR=",mapYear," GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    # #A kluge to use 1953, but worth it to avoid complexity
+    # if(generateYear==1953){
+    #   mapYear="1954_June"
+    #   #output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_June' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+    #   output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_June' GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    # }
+    # if(generateYear==1954){
+    #   mapYear="1954_December"
+    #   #output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_December' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+    #   output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_December' GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    # }
+    # 
+    # output_rs_route_style = dbSendQuery(routesDb,output_query_route_style)
+    # output_dbRows_route_style<-dbFetch(output_rs_route_style, 999999)
+    # if (nrow(output_dbRows_route_style)==0){
+    #   print (paste0("Zero rows for ",mapYear))
+    #   dbClearResult(output_rs_route_style)
+    # 
+    # } else {
+    # 
+    #   for (i_route_style in 1:nrow(output_dbRows_route_style)) {
+    #     print(paste0("Route Style for ", mapYear))
+    #     print(output_dbRows_route_style[i_route_style, 1])
+    # 
+    #   writeLines(paste0("          if (feature.properties.RTE_TYPE == '",output_dbRows_route_style[i_route_style, 1],"') {"), outputFileHtmlCon)
+    #   writeLines('            layer.setStyle({', outputFileHtmlCon)
+    #   writeLines(paste0("              color: '",output_dbRows_route_style[i_route_style, 6],"'"), outputFileHtmlCon)
+    #   writeLines("            });", outputFileHtmlCon)
+    #   writeLines("          }", outputFileHtmlCon)
+    # 
+    #   }
+    #   dbClearResult(output_rs_route_style)
+    # 
+    # }
+
+
+
+    # writeLines("          if (feature.properties.RTE_TYPE == 'Main Route - Regular') {", outputFileHtmlCon)
+    # writeLines('            layer.setStyle({', outputFileHtmlCon)
+    # writeLines("              color: 'red'", outputFileHtmlCon)
+    # writeLines("            });", outputFileHtmlCon)
+    # writeLines("          } else {", outputFileHtmlCon)
+    # writeLines("            if (feature.properties.RTE_TYPE == 'Transfer Route - Regular') {", outputFileHtmlCon)
+    # writeLines("              layer.setStyle({", outputFileHtmlCon)
+    # writeLines("                color: 'green'", outputFileHtmlCon)
+    # writeLines("              });", outputFileHtmlCon)
+    # writeLines("            } else {", outputFileHtmlCon)
+    # writeLines("              layer.setStyle({", outputFileHtmlCon)
+    # writeLines("                color: 'blue'", outputFileHtmlCon)
+    # writeLines("              });", outputFileHtmlCon)
+    # writeLines("            }", outputFileHtmlCon)
+    # writeLines("          }", outputFileHtmlCon)
+
+
+    # writeLines("        }", outputFileHtmlCon)
+
+    
     writeLines("      });", outputFileHtmlCon)
+    
+    
+    
     writeLines("", outputFileHtmlCon)      
     writeLines("", outputFileHtmlCon)
     writeLines("      map = L.map('my-map')", outputFileHtmlCon)
     writeLines("      .fitBounds(geojson.getBounds());", outputFileHtmlCon)
     writeLines("      //    .setView([0.0,-10.0], 2);", outputFileHtmlCon)
     writeLines("      basemap.addTo(map);", outputFileHtmlCon)
-    writeLines("      geojson.addTo(map);", outputFileHtmlCon)
+    #writeLines("      geojson.addTo(map);", outputFileHtmlCon)
     writeLines("", outputFileHtmlCon)      
     writeLines("      // add legend control layers - global variable with (null, null) allows indiv basemaps and overlays to be added inside functions below", outputFileHtmlCon)
     writeLines("      var controlLayers = L.control.layers(null, null, {", outputFileHtmlCon)
     writeLines('        position: "topright",', outputFileHtmlCon)
     writeLines("        collapsed: false // false = open by default", outputFileHtmlCon)
     writeLines("      }).addTo(map);", outputFileHtmlCon)
-    writeLines("", outputFileHtmlCon)      
-    writeLines("", outputFileHtmlCon)
+    writeLines("", outputFileHtmlCon)   
+    
+    writeLines("// Urban extent", outputFileHtmlCon)
     writeLines("      $.ajax({", outputFileHtmlCon)
     writeLines("        type: 'POST',", outputFileHtmlCon)
     writeLines(paste0("        url: 'http://jeffblackadar.ca/oc-transpo/urban_growth_",urbanGrowthYear,".geojson',"), outputFileHtmlCon)
@@ -185,8 +238,63 @@ for (generateYear in 1929:2015){
     writeLines("        }", outputFileHtmlCon)
     writeLines("      });", outputFileHtmlCon)
     writeLines("", outputFileHtmlCon)
+
+    #Write a geojson for each RTE_TYPE so they can be added to the map individually
+    output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE YEAR=",mapYear," GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    #A kluge to use 1953, but worth it to avoid complexity
+    if(generateYear==1953){
+      mapYear="1954_June"    
+      #output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_June' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+      output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_June' GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    }
+    if(generateYear==1954){
+      mapYear="1954_December"
+      #output_query<-paste0("SELECT tbl_route_maps.ID, tbl_route_maps.RTE_SHP_FILE_NAME, tbl_route_maps.RTE_SHP_FILE_FOLDER, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_maps.RTE_NUM, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_December' ORDER BY RTE_TYPE_MODE_CODE DESC, RTE_NUM;")
+      output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE RTE_SHP_FILE_FOLDER='1954_December' GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
+    }
+    
+    output_rs_route_style = dbSendQuery(routesDb,output_query_route_style)
+    output_dbRows_route_style<-dbFetch(output_rs_route_style, 999999)
+    if (nrow(output_dbRows_route_style)==0){
+      print (paste0("Zero rows for ",mapYear))
+      dbClearResult(output_rs_route_style)
+      
+    } else {
+      
+      for (i_route_style in 1:nrow(output_dbRows_route_style)) {
+        print(paste0("Separate geojson file in year ", mapYear, " for "))
+        print(output_dbRows_route_style[i_route_style, 1])
+        routeLayerName <- paste0(gsub("-","",gsub(" ","",output_dbRows_route_style[i_route_style, 1])),"Layer")
+        writeLines("")
+        writeLines(paste0("// layer for ",output_dbRows_route_style[i_route_style, 1]), outputFileHtmlCon)
+        writeLines("      $.ajax({", outputFileHtmlCon)
+        writeLines("        type: 'POST',", outputFileHtmlCon)
+        writeLines(paste0("        url: 'http://jeffblackadar.ca/oc-transpo/",mapYear,"-",gsub(" ","-",output_dbRows_route_style[i_route_style, 1]),".geojson',"), outputFileHtmlCon)
+        writeLines("        dataType: 'json',", outputFileHtmlCon)
+        writeLines("        success: function(response) {", outputFileHtmlCon)
+        writeLines(paste0("          ",routeLayerName," = L.geoJson(response);"), outputFileHtmlCon)
+        writeLines(paste0("          ",routeLayerName,".setStyle({"), outputFileHtmlCon)
+        writeLines(paste0("            color: '",output_dbRows_route_style[i_route_style, 6],"',"), outputFileHtmlCon)
+        writeLines("            weight: 2,", outputFileHtmlCon)
+        writeLines('            opacity: 1', outputFileHtmlCon)
+        writeLines("          });", outputFileHtmlCon)
+        writeLines(paste0("          ",routeLayerName,".addTo(map);"), outputFileHtmlCon)
+        writeLines(paste0("          controlLayers.addOverlay(",routeLayerName,", '",output_dbRows_route_style[i_route_style, 1],"');"), outputFileHtmlCon)
+        #writeLines("          map.fitBounds(geojsonLayer.getBounds());", outputFileHtmlCon)
+        writeLines("        }", outputFileHtmlCon)
+        writeLines("      });", outputFileHtmlCon)
+        writeLines("", outputFileHtmlCon)
+        
+
+      }
+      dbClearResult(output_rs_route_style)
+      
+    }
+    
+    
+    
     writeLines("      controlLayers.addOverlay(basemap, 'Today (OSM)');", outputFileHtmlCon)
-    writeLines(paste0("      controlLayers.addOverlay(geojson, 'Bus routes ",mapYear,"');"), outputFileHtmlCon)
+    #writeLines(paste0("      controlLayers.addOverlay(geojson, 'Bus routes ",mapYear,"');"), outputFileHtmlCon)
     writeLines("      ", outputFileHtmlCon)
     
     writeLines("    });", outputFileHtmlCon)
