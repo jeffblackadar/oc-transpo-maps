@@ -9,3 +9,6 @@ https://library.carleton.ca/find/gis/geospatial-data/oc-transpo-transit-routes
 This project was created for:
 HIST 4303A:  Maps and Mapping in Canadian History
 Dr. John Walsh
+
+## Author
+Jeff Blackadar   jeffblackadar[at]gmail   @jeffblackadar
