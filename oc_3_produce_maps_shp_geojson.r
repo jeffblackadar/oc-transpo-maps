@@ -122,7 +122,7 @@ transitMap <- ottawaMap
 
 
 
-for (generateYear in 2002:2015){
+for (generateYear in 2014:2015){
   
   print(paste0("Generating maps and geojson for year ", generateYear))
   
@@ -179,7 +179,27 @@ for (generateYear in 2002:2015){
       #0      152 Peak Route  Bus 2000
       if("RTE_RUM" %in% colnames(route@data)){
         routeDataDf<-plyr::rename(routeDataDf, c("RTE_RUM"="RTE_NUM"))
-      }       
+      }     
+      
+      #To fix
+      #"RTE_094_RegularRoute_2014.shp"
+      #It has 6 fields
+      #Error in rbind(deparse.level, ...) :
+      if("OBJECTID_1" %in% colnames(route@data)){
+        routeDataDf$OBJECTID_1<-NULL
+      }     
+      if("Shape_Leng" %in% colnames(route@data)){
+        routeDataDf$Shape_Leng<-NULL
+      }
+      # To Fix
+      # [1] "RTE_099_RegularRoute_2014.shp"
+      # It has 5 fields
+      # Error in rbind(deparse.level, ...) : 
+      #   numbers of columns of arguments do not match
+      if("OBJECTID" %in% colnames(route@data)){
+        routeDataDf$OBJECTID<-NULL
+      }
+
       #summary(route)
       route@data<-routeDataDf
       

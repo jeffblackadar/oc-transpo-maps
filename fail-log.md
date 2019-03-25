@@ -245,3 +245,7 @@ RTE_RUM   RTE_TYPE MODE YEAR
 0      152 Peak Route  Bus 2000
 C:\a_orgs\carleton\hist3814\R\oc-transpo-maps-data\route-maps\2000_Routes\RTE_152_PeakRoute_2000.shp
 ```
+# RTE_094_RegularRoute_2014 has six fields?
+```
+[1] "RTE_094_RegularRoute_2014.shp"
+```
