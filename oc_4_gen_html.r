@@ -106,7 +106,7 @@ for (generateYear in 1929:2015){
     writeLines('<!DOCTYPE html>', outputFileHtmlCon)
     writeLines('  <html>', outputFileHtmlCon)
     writeLines('  <head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">', outputFileHtmlCon)
-    writeLines('  <title>Ottawa Mass Transit Maps</title>', outputFileHtmlCon)
+    writeLines(paste0('  <title>Ottawa Mass Transit Maps ',mapYear,'</title>'), outputFileHtmlCon)
     writeLines('  <link href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" rel="stylesheet" /><script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script><script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>', outputFileHtmlCon)
     writeLines('  <style type="text/css">#my-map {', outputFileHtmlCon)
     writeLines('  width:960px;', outputFileHtmlCon)
@@ -136,7 +136,7 @@ for (generateYear in 1929:2015){
     writeLines('', outputFileHtmlCon)
     writeLines('  window.onload = function() {', outputFileHtmlCon)
     writeLines("    var basemap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {", outputFileHtmlCon)
-    writeLines(paste0("      attribution: '&copy; ",'<a href="http://osm.org/copyright">OpenStreetMap</a>'," contributors'"), outputFileHtmlCon)
+    writeLines(paste0("      attribution: '&copy; ",'<a href="http://osm.org/copyright">OpenStreetMap</a>',' contributors | <a href="https://library.carleton.ca/find/gis/geospatial-data/oc-transpo-transit-routes">MacOdrum Library</a>',"'"), outputFileHtmlCon)
     writeLines("    });", outputFileHtmlCon)
     writeLines("", outputFileHtmlCon)
     
@@ -219,7 +219,15 @@ for (generateYear in 1929:2015){
         writeLines(paste0("        url: 'http://jeffblackadar.ca/oc-transpo/",mapYear,"-",gsub(" ","-",output_dbRows_route_style[i_route_style, 1]),".geojson',"), outputFileHtmlCon)
         writeLines("        dataType: 'json',", outputFileHtmlCon)
         writeLines("        success: function(response) {", outputFileHtmlCon)
-        writeLines(paste0("          ",routeLayerName," = L.geoJson(response);"), outputFileHtmlCon)
+        writeLines(paste0("          ",routeLayerName," = L.geoJson(response, {"), outputFileHtmlCon)
+        # Only need attribution once.
+        #if(i_route_style ==1){
+        #writeLines(paste0("      attribution: '",'<a href="https://library.carleton.ca/find/gis/geospatial-data/oc-transpo-transit-routes">Carleton University</a>'," ';"), outputFileHtmlCon)
+        #}
+        writeLines("             onEachFeature: function (feature, layer) {", outputFileHtmlCon)
+        writeLines("                 layer.bindPopup('<h3>'+feature.properties.RTE_NUM+'</h3><p>'+feature.properties.RTE_TYPE+'</p><p>'+feature.properties.MODE+'</p>');", outputFileHtmlCon)
+        writeLines("               }", outputFileHtmlCon)
+        writeLines("             });", outputFileHtmlCon)
         writeLines(paste0("          ",routeLayerName,".setStyle({"), outputFileHtmlCon)
         writeLines(paste0("            color: '",output_dbRows_route_style[i_route_style, 6],"',"), outputFileHtmlCon)
         writeLines("            weight: 2,", outputFileHtmlCon)

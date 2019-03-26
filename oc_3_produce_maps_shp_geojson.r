@@ -122,7 +122,7 @@ transitMap <- ottawaMap
 
 
 
-for (generateYear in 2014:2015){
+for (generateYear in 2015:2015){
   
   print(paste0("Generating maps and geojson for year ", generateYear))
   
