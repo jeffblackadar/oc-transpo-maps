@@ -249,3 +249,23 @@ C:\a_orgs\carleton\hist3814\R\oc-transpo-maps-data\route-maps\2000_Routes\RTE_15
 ```
 [1] "RTE_094_RegularRoute_2014.shp"
 ```
+
+## historical maps
+http://geo1.scholarsportal.info.proxy.library.carleton.ca/#r/tab/browseTab/result
+
+## GeoJson not showing
+Had to transform the CRS
+mergeGeo2<-spTransform(mergeGeo,CRS("+init=epsg:4326"))
+mergeGeo2
+
+# Historical Scanned Maps
+Go to Scholar's Geo Portal
+http://geo1.scholarsportal.info.proxy.library.carleton.ca/#r/tab/browseTab/result
+Historical Scanned Maps (2)
+Historical Topographic Maps: 1:63,360 Index
+
+In QGIS
+Opend layer as raster
+Exported with new extents
+1939 the extents
+427000.0000000000000000,5022000.0000000000000000 : 455000.0000000000000000,5035000.0000000000000000
