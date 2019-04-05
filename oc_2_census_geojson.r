@@ -3,7 +3,6 @@ require(rgdal)
 
 censusPath <-"C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\census\\census_tracts\\"
 
-
 censusYears<-c(1961,1971)
 for(cYr in 1:length(censusYears)){
   print(censusYears[cYr])

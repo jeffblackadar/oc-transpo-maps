@@ -137,27 +137,33 @@ for (generateYear in 1929:2015){
     writeLines('}', outputFileHtmlCon)
     writeLines('h1 {', outputFileHtmlCon)
     writeLines('  color: #AA0000;', outputFileHtmlCon)
-    writeLines('    font-size: 24px;', outputFileHtmlCon)
-    writeLines('    font-family: verdana;', outputFileHtmlCon)
+    writeLines('  font-size: 24px;', outputFileHtmlCon)
+    writeLines('  font-family: verdana;', outputFileHtmlCon)
     writeLines('}', outputFileHtmlCon)
     writeLines('h2 {', outputFileHtmlCon)
     writeLines('  color: #000000;', outputFileHtmlCon)
-    writeLines('    font-size: 20px;', outputFileHtmlCon)
-    writeLines('    font-family: verdana;', outputFileHtmlCon)
+    writeLines('  font-size: 20px;', outputFileHtmlCon)
+    writeLines('  font-family: verdana;', outputFileHtmlCon)
     writeLines('}', outputFileHtmlCon)
     writeLines('h3 {', outputFileHtmlCon)
     writeLines('  color: #000000;', outputFileHtmlCon)
-    writeLines('    font-size: 16px;', outputFileHtmlCon)
-    writeLines('    font-family: verdana;', outputFileHtmlCon)
+    writeLines('  font-size: 16px;', outputFileHtmlCon)
+    writeLines('  font-family: verdana;', outputFileHtmlCon)
     writeLines('}', outputFileHtmlCon)    
     writeLines('p {', outputFileHtmlCon)
     writeLines('  color: #996600;', outputFileHtmlCon)
-    writeLines('    font-family: verdana;', outputFileHtmlCon)
+    writeLines('  font-family: verdana;', outputFileHtmlCon)
+    writeLines('}', outputFileHtmlCon)
+    writeLines('th {', outputFileHtmlCon)
+    writeLines('  text-align: right;', outputFileHtmlCon)
+    writeLines('  font-family: verdana;', outputFileHtmlCon)
+    writeLines('  color: #663300;', outputFileHtmlCon)
     writeLines('}', outputFileHtmlCon)
     writeLines('td {', outputFileHtmlCon)
     writeLines('  text-align: right;', outputFileHtmlCon)
+    writeLines('  font-family: verdana;', outputFileHtmlCon)
+    writeLines('  color: #663300;', outputFileHtmlCon)
     writeLines('}', outputFileHtmlCon)
-    
     writeLines('</style>', outputFileHtmlCon)
     writeLines('  </head>', outputFileHtmlCon)
     writeLines('  <body>', outputFileHtmlCon)
@@ -238,7 +244,7 @@ for (generateYear in 1929:2015){
       writeLines(paste0("// Census"), outputFileHtmlCon)
       writeLines(paste0("   $.ajax({"), outputFileHtmlCon)
       writeLines(paste0("      type: 'POST',"), outputFileHtmlCon)
-      writeLines(paste0("      url: 'http://jeffblackadar.ca/oc-transpo/",censusYear,"_census_auto.geojson',"), outputFileHtmlCon)
+      writeLines(paste0("      url: '",censusYear,"_census_auto.geojson',"), outputFileHtmlCon)
       writeLines(paste0("      dataType: 'json',"), outputFileHtmlCon)
       writeLines(paste0("      success: function(response) {"), outputFileHtmlCon)
       writeLines(paste0("         censusAutoLayer = L.geoJson(response, {"), outputFileHtmlCon)
@@ -312,7 +318,7 @@ for (generateYear in 1929:2015){
     writeLines("// Urban extent", outputFileHtmlCon)
     writeLines("      $.ajax({", outputFileHtmlCon)
     writeLines("        type: 'POST',", outputFileHtmlCon)
-    writeLines(paste0("        url: 'http://jeffblackadar.ca/oc-transpo/urban_growth_",urbanGrowthYear,".geojson',"), outputFileHtmlCon)
+    writeLines(paste0("        url: 'urban_growth_",urbanGrowthYear,".geojson',"), outputFileHtmlCon)
     writeLines("        dataType: 'json',", outputFileHtmlCon)
     writeLines("        success: function(response) {", outputFileHtmlCon)
     writeLines("          geojsonLayer = L.geoJson(response);", outputFileHtmlCon)
@@ -359,7 +365,7 @@ for (generateYear in 1929:2015){
         writeLines(paste0("// layer for ",output_dbRows_route_style[i_route_style, 1]), outputFileHtmlCon)
         writeLines("      $.ajax({", outputFileHtmlCon)
         writeLines("        type: 'POST',", outputFileHtmlCon)
-        writeLines(paste0("        url: 'http://jeffblackadar.ca/oc-transpo/",mapYear,"-",gsub(" ","-",output_dbRows_route_style[i_route_style, 1]),".geojson',"), outputFileHtmlCon)
+        writeLines(paste0("        url: '",mapYear,"-",gsub(" ","-",output_dbRows_route_style[i_route_style, 1]),".geojson',"), outputFileHtmlCon)
         writeLines("        dataType: 'json',", outputFileHtmlCon)
         writeLines("        success: function(response) {", outputFileHtmlCon)
         writeLines(paste0("          ",routeLayerName," = L.geoJson(response, {"), outputFileHtmlCon)
@@ -369,7 +375,7 @@ for (generateYear in 1929:2015){
         #}
         writeLines("             onEachFeature: function (feature, layer) {", outputFileHtmlCon)
         if(generateYear<=1948){
-          writeLines("                 layer.bindPopup('<p>'+feature.properties.RTE_TYPE+'</p><p>'+feature.properties.MODE+'</p>');", outputFileHtmlCon)  
+          writeLines("                 layer.bindPopup('<h3>Route Name: '+feature.properties.RTE_NAME+'</h3><p>'+feature.properties.RTE_TYPE+'</p><p>'+feature.properties.MODE+'</p>');", outputFileHtmlCon)  
         }else{
           writeLines("                 layer.bindPopup('<h3>Route Number: '+feature.properties.RTE_NUM+'</h3><p>'+feature.properties.RTE_TYPE+'</p><p>'+feature.properties.MODE+'</p>');", outputFileHtmlCon)  
         }
@@ -388,21 +394,13 @@ for (generateYear in 1929:2015){
         writeLines("        }", outputFileHtmlCon)
         writeLines("      });", outputFileHtmlCon)
         writeLines("", outputFileHtmlCon)
-        
-
       }
       dbClearResult(output_rs_route_style)
-      
     }
-    
-    
-    
-    writeLines(paste0("      controlLayers.addOverlay(basemap, '",basemapTitle,"');"), outputFileHtmlCon)
-    #writeLines(paste0("      controlLayers.addOverlay(geojson, 'Bus routes ",mapYear,"');"), outputFileHtmlCon)
-    writeLines("      ", outputFileHtmlCon)
-    
-    writeLines("    });", outputFileHtmlCon)
 
+    writeLines(paste0("      controlLayers.addOverlay(basemap, '",basemapTitle,"');"), outputFileHtmlCon)
+    writeLines("      ", outputFileHtmlCon)
+    writeLines("    });", outputFileHtmlCon)
     writeLines("  };", outputFileHtmlCon)
     writeLines("  </script>", outputFileHtmlCon)
     
@@ -428,7 +426,6 @@ for (generateYear in 1929:2015){
     }else{
       writeLines(paste0("<tr><th>Map<br>line<br>colour</th><th>Route<br>number</th><th>Route type</th><th>Route mode</th></tr>"), outputFileHtmlCon)
     }
-    
     output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_NUM, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE YEAR=",mapYear," ORDER BY RTE_NUM,RTE_TYPE;")
     #A kluge to use 1953, but worth it to avoid complexity
     if(generateYear==1953){
@@ -448,9 +445,7 @@ for (generateYear in 1929:2015){
     if (nrow(output_dbRows_route_style)==0){
       print (paste0("Zero rows for ",mapYear))
       dbClearResult(output_rs_route_style)
-      
     } else {
-      
       for (i_route_style in 1:nrow(output_dbRows_route_style)) {
         #print(paste0("To map ", mapYear, " adding "))
         #print(output_dbRows_route_style[i_route_style, 1])
@@ -461,14 +456,11 @@ for (generateYear in 1929:2015){
         writeLines(paste0("</tr>"), outputFileHtmlCon)
       }
       dbClearResult(output_rs_route_style)
-      
     }
-    
     writeLines(paste0("</table>"), outputFileHtmlCon)
     writeLines("    </body>", outputFileHtmlCon)
     writeLines("    </html>", outputFileHtmlCon)
     close(outputFileHtmlCon)
   }
-  
 }
 dbDisconnect(routesDb)

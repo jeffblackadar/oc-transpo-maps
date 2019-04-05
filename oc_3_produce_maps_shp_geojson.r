@@ -303,42 +303,21 @@ for (generateYear in 2015:2015){
     if (nrow(output_dbRows_route_style)==0){
       print (paste0("Zero rows for ",mapYear))
       dbClearResult(output_rs_route_style)
-      
     } else {
-      
       for (i_route_style in 1:nrow(output_dbRows_route_style)) {
         print(paste0("Separate geojson file in year ", mapYear, " for "))
         print(output_dbRows_route_style[i_route_style, 1])
-        
-        
         just_RTE_TYPE <- subset(routesDf, RTE_TYPE==output_dbRows_route_style[i_route_style, 1])
-        
-        
         rgdal::writeOGR(obj=just_RTE_TYPE,dsn = paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,"-",gsub(" ", "-",output_dbRows_route_style[i_route_style, 1]),".geojson"), layer = paste0(mapYear,"-",output_dbRows_route_style[i_route_style, 1],"_map"), driver="GeoJSON",overwrite_layer=TRUE)
-
       }
       dbClearResult(output_rs_route_style)
-      
     }
-    
-    
     dbClearResult(output_rs)
   }
 } 
 # close for loop
 #route@lines
 ?#summary(routesDf)
-  
-  #writeOGR(inputJSON, "outTest.geojson", layer="inputJSON", driver="GeoJSON",check_exists = FALSE)
-  
-  #transitMap$plot_env$legend
-  #transitMap <- ottawaMap
-  #transitMap <- transitMap + geom_path(aes(x=long, y=lat, fill = "red", colour = "red"), size=1, shape = 1, data=route )
-  #transitMap <- transitMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color=routeColor, data=route, alpha=0)
-  #transitMap
-  #plot(shape)
-  
-  
 
 #require(sf)
 #shape <- read_sf(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps\\route-maps\\1929_Routes", layer = "BusRoute_Crosstown_1929")
