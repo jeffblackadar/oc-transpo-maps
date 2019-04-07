@@ -150,7 +150,9 @@ update oc_transpo_maps.tbl_route_maps set RTE_TYPE_GROOMED=RTE_TYPE where ID>130
 ```
 
 # Urban Extent
+The National Capital Commission created a series of GIS files show urban growth during 1810-2012. These files are avaiable through [Carleton University](https://library.carleton.ca/find/gis/geospatial-data/ottawa-land-use-and-urban-growth). [Project references](http://jeffblackadar.ca/oc-transpo/references.pdf).
 
+Maps of this project use a specific year of the urban growth data to show the extent of urbanization during the time mass transit was operating. The program [oc_2_urban_growth_geojson.r](https://github.com/jeffblackadar/oc-transpo-maps/blob/master/oc_2_urban_growth_geojson.r) splits up the urban growth data into geojson files for specific years between 1927 - 2012.
 
 # Census data
 http://dc1.chass.utoronto.ca.proxy.library.carleton.ca/census/1961_ct.html
