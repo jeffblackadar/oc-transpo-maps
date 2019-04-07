@@ -1,15 +1,17 @@
 # OC Transpo Maps
 ## Data load process
 ### Download source data
-Create a destination directory. I used:
+Create a destination directory for the data outside of the R working directory. I used:
+```
 C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps
+```
 Run R program oc_0_shp_download.r to download the .zip files and unzip them.
 
 ### Load database with Shapefile information
 #### Load all of the shp files
 In the directory where the shapefiles are:
 ```
-C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps>
+C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps
 ```
 Run
 ```
