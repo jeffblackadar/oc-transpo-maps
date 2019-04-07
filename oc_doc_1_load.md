@@ -11,7 +11,7 @@ Create a destination directory for the data outside of the R working directory. 
 ```
 C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps
 ```
-Run R program oc_0_shp_download.r to download the .zip files and unzip them.
+Run R program [oc_0_shp_download.r](https://github.com/jeffblackadar/oc-transpo-maps/blob/master/oc_0_shp_download.r) to download the .zip files and unzip them.
 
 ### Load database with Shapefile information
 #### Load all of the shp files
@@ -23,15 +23,16 @@ Run
 ```
 for /r %i in (*.shp) do @echo %~pnxi >>oc-shps.txt
 ```
-This command lists all of the file names in subdirectories and stores them into oc-shps.txt.
+This command lists all of the file names in subdirectories and stores them into a text file called oc-shps.txt.
 
 Open oc-shps.txt in a text file editor. 
 This next step will change this list of file names into a comma separated value file (.csv) to be loaded into a database.
 
+##### Modify oc-shps.txt to be a .csv so it can be loaded into a database
 
-Made a file like this (replace the paths, replace the / with , add a header)
+The next steps adapt the content of oc-shps.txt so it can be loaded as data. 
 
-In the text editory, replace all:
+In the text editor, replace all:
 \\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps\\
 with "" (no space)
 
@@ -49,13 +50,15 @@ RTE_SHP_FILE_FOLDER,RTE_SHP_FILE_NAME
 1929_Routes,CarRoute_BritanniaGeorgeLoop_1929.shp 
 ```
 
-### Loaded the data
+Save file as oc-shps.csv
+
+### Load the data
+
+The route information from the shapefiles is stored in a database so that it can be queried in R to generate maps and combined with other data.
+I used instructions from the [Programming Historian](https://programminghistorian.org/en/lessons/getting-started-with-mysql-using-r)
+(These instructions were written by me, but they are a helpful reminder.)
 
 #### Create database
-The route information from the shapefiles is stored in a database so that it can be queried in R to generate maps and combined with other data.
-I used instructions from here: (these are mine, but they are a helpful reminder.)
-https://programminghistorian.org/en/lessons/getting-started-with-mysql-using-r
-
 In MySQL create the database and use it.
 ```
 CREATE DATABASE oc_transpo_maps;
@@ -71,11 +74,13 @@ CREATE TABLE `tbl_route_maps` (
   `YEAR` int(11) DEFAULT NULL COMMENT 'The year of the shapefile''s data',
   `RTE_NAME` varchar(99) DEFAULT NULL COMMENT 'The route name.',
   `RTE_NUM` varchar(99) DEFAULT NULL COMMENT 'The route number.',
-  `Mode` varchar(50) DEFAULT NULL COMMENT 'The Mode of the route. (Street Car)',
+  `MODE` varchar(50) DEFAULT NULL COMMENT 'The Mode of the route. (Street Car)',
   `RTE_TYPE` varchar(50) DEFAULT NULL COMMENT 'The route type. This is the original data from the shapefiles.',
-  `RTE_TYPE_GROOMED` varchar(50) DEFAULT NULL COMMENT 'The route type. This is modified or groomed data from the shapefiles for more consistency during differnet years.',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5793 DEFAULT CHARSET=utf8 COMMENT='Contains the list of shapefiles and their attributes so that they can be queried to generate maps from data that matches the query.';
+  `RTE_TYPE_GROOMED` varchar(50) DEFAULT NULL COMMENT 'The route type. This is modified or groomed data from the shapefiles for more consistency during different years.',
+  PRIMARY KEY (`id`),
+  KEY `idx_id` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5662 DEFAULT CHARSET=utf8 COMMENT='Contains the list of shapefiles and their attributes so that they can be queried to generate maps from data that matches the query.';
+
 
 ```
 Create a user to access the table
@@ -121,7 +126,7 @@ SELECT COUNT(*) FROM oc_transpo_maps.tbl_route_maps;
 ### Load the data from the shapefiles into the database
 The data load program reads each shapefile and stores the data into fields in the database. Loading the data makes it more easy to query. It can also be groomed for analytical purposes to allow comparison of transit routes from different years.
 
-run the program oc_1_shp_data_load.r.  It takes approximately 2 hours to read and process all 5661 files.
+run the program [oc_1_shp_data_load.r](https://github.com/jeffblackadar/oc-transpo-maps/blob/master/oc_1_shp_data_load.r).  It takes approximately 2 hours to read and process all 5661 files on my desktop computer.
 
 
 #### Check for data quality
