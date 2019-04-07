@@ -1,6 +1,12 @@
 # OC Transpo Maps
 ## Data load process
 ### Download source data
+
+#### Source data
+This project uses GIS shapefiles of [OC Transpo Transit Routes 1929-2015](https://library.carleton.ca/find/gis/geospatial-data/oc-transpo-transit-routes) created and published by Carleton University. [Project references](http://jeffblackadar.ca/oc-transpo/references.pdf).
+
+#### Process to download data
+
 Create a destination directory for the data outside of the R working directory. I used:
 ```
 C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\route-maps
