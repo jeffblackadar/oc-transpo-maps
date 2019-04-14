@@ -15,3 +15,5 @@ Most of the map layers have items that contain data. This data can be shown in a
 ## Overlapping routes
 Mass transit routes overlap in places. To see a route's full extent, click and re-click appropriate route layer in the map control panel to put the later on top of the others. As an alternative, turn off other layers so you can see one layer more clearly.
 
+Back to [the maps](http://jeffblackadar.ca/oc-transpo/1929.html).
+
