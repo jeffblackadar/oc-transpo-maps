@@ -6,9 +6,9 @@
 #install.packages("svglite")
 
 #
-#Before starting this:
+#Before starting this program:
 #do
-#register_google(key = "hhh")
+#register_google(key = "???-your api key")
 
 library(ggmap)
 #citation("ggmap")
@@ -24,9 +24,6 @@ require(rgdal)
 
 library(RMariaDB)
 #citation("RMariaDB")
-
-#library(svglite)
-#citation("svglite")
 
 library(plyr)
 # R needs a full path to find the settings file.
@@ -118,11 +115,8 @@ ottawaMap
 
 transitMap <- ottawaMap
 
-
-
-
-
-for (generateYear in 2015:2015){
+#Loop through each year to create the geojson files needed for leaflet maps
+for (generateYear in 2006:2015){
   
   print(paste0("Generating maps and geojson for year ", generateYear))
   
@@ -174,14 +168,14 @@ for (generateYear in 2015:2015){
       if("RTE_Type" %in% colnames(route@data)){
         routeDataDf<-plyr::rename(routeDataDf, c("RTE_Type"="RTE_TYPE"))
       } 
-      #To fix
+      #The if statement below is to fix
       #RTE_RUM   RTE_TYPE MODE YEAR
       #0      152 Peak Route  Bus 2000
       if("RTE_RUM" %in% colnames(route@data)){
         routeDataDf<-plyr::rename(routeDataDf, c("RTE_RUM"="RTE_NUM"))
       }     
       
-      #To fix
+      #The if statement below is to fix
       #"RTE_094_RegularRoute_2014.shp"
       #It has 6 fields
       #Error in rbind(deparse.level, ...) :
@@ -202,7 +196,6 @@ for (generateYear in 2015:2015){
 
       #summary(route)
       route@data<-routeDataDf
-      
       
       if(i==1) {
         routesDf <- route
@@ -242,18 +235,9 @@ for (generateYear in 2015:2015){
           }
         }  
       }
-      
-      
-      #transitMap <- transitMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color=routeColor, data=route, alpha=0)
       transitMap <- transitMap + geom_path(data=routeDf, mapping=aes(x=long, y=lat, group=group), size=routeSize, linejoin="round", color=routeColor)
     }
-    
-    
-    
-    
-    
-    #plot(route,col="coral4", lwd=2)
-    
+
     #http://environmentalcomputing.net/plotting-with-ggplot-adding-titles-and-axis-names/
     mapTheme <- theme(plot.title = element_text(family = "Helvetica", face = "bold", size = (12)), 
                       legend.title = element_text(colour = "steelblue",  face = "bold.italic", family = "Helvetica"), 
@@ -263,25 +247,15 @@ for (generateYear in 2015:2015){
     
     transitMap<-transitMap+mapTheme+ggtitle(paste0("Ottawa Transit Map for ",mapYear))
     transitMap$labels$subtitle=""
-    #transitMap<-transitMap+scale_color(c("green","red","blue"), breaks=c(1,2,3), labels=c("Regular","Peak","Train"))
-    #transitMap$plot_env$legend.title="k"
-    #transitMap$plot_env$legend.text="hh"
-    #transitMap$plot_env$
     transitMap
     
-    #Messing around here
-    #transitMap <- transitMap + geom_polygon(data=routeUG, mapping=aes(x=long, y=lat, group=group), size=routeSize, fill='grey',  alpha=0, color="red")
-    
-    #                                       geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color=routeColor, data=route, alpha=0)
-    #ggsave(filename="test.svg",plot=image,width=10,height=8,units="cm")
-    #landUse <- readOGR(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\Urban_Growth", layer = "UrbanGrowth_AllYears")
-    #landUse <- spTransform(landUse, CRS("+proj=longlat +datum=WGS84"))
-    #landUse <- fortify(landUse)
-    #transitMap <- transitMap + geom_polygon(aes(x=long, y=lat, group=group), fill='grey', size=.2,color='green', data=landUse, alpha=0)
-    #transitMap
-    
+    #Write a shape file containing all of the routes for 1 year
+    #I am no using these anymore for this project, but I am leaving this here to make sure that the shape files are updated when this is run.
+    print(paste0("writing big SHP for ",mapYear))
     rgdal::writeOGR(obj=routesDf,dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output", layer = paste0(mapYear,"_map"), driver="ESRI Shapefile",overwrite_layer=TRUE)
     
+    #Write a geojson file containing all of the routes for 1 year
+    #I am no longer loading one large geojson file into leaflet for this project (it does not perform well), but I am leaving this here to make sure that it gets updated when this is run.
     rgdal::writeOGR(obj=routesDf,dsn = paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,".geojson"), layer = paste0(mapYear,"_map"), driver="GeoJSON",overwrite_layer=TRUE)
     
     #Write a geojson for each RTE_TYPE so they can be added to the map individually
@@ -307,21 +281,25 @@ for (generateYear in 2015:2015){
       for (i_route_style in 1:nrow(output_dbRows_route_style)) {
         print(paste0("Separate geojson file in year ", mapYear, " for "))
         print(output_dbRows_route_style[i_route_style, 1])
+        #We have a nice dataframe of geographic data, we can write subsets of it for different uses, like individual geojson files for each route type
         just_RTE_TYPE <- subset(routesDf, RTE_TYPE==output_dbRows_route_style[i_route_style, 1])
         rgdal::writeOGR(obj=just_RTE_TYPE,dsn = paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,"-",gsub(" ", "-",output_dbRows_route_style[i_route_style, 1]),".geojson"), layer = paste0(mapYear,"-",output_dbRows_route_style[i_route_style, 1],"_map"), driver="GeoJSON",overwrite_layer=TRUE)
       }
       dbClearResult(output_rs_route_style)
     }
     dbClearResult(output_rs)
+    
+    #Write a geojson for each year MODE = Street Car or Train to a rail only map may be seen
+    if(generateYear<2001){
+      just_MODE <- subset(routesDf, MODE=="Street Car")
+      rgdal::writeOGR(obj=just_MODE,dsn = paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,"_rail_only_map.geojson"), layer = paste0(mapYear,"_rail_only_map"), driver="GeoJSON",overwrite_layer=TRUE)
+    }else{
+      just_MODE <- subset(routesDf, MODE=="Train")
+      rgdal::writeOGR(obj=just_MODE,dsn = paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\",mapYear,"_rail_only_map.geojson"), layer = paste0(mapYear,"_rail_only_map"), driver="GeoJSON",overwrite_layer=TRUE)
+    }
   }
 } 
 # close for loop
-#route@lines
-?#summary(routesDf)
-
-#require(sf)
-#shape <- read_sf(dsn = "C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps\\route-maps\\1929_Routes", layer = "BusRoute_Crosstown_1929")
 
 # disconnect to clean up the connection to the database.
 dbDisconnect(routesDb)
-

@@ -269,3 +269,10 @@ Opend layer as raster
 Exported with new extents
 1939 the extents
 427000.0000000000000000,5022000.0000000000000000 : 455000.0000000000000000,5035000.0000000000000000
+
+## Today's work
+Write to get permission to use data on web site
+Update references with citations and bibliography
+document questions the maps raise
+Animate map
+Instructions.
