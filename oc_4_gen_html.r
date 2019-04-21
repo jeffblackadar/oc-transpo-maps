@@ -35,6 +35,10 @@ genMapHTMLTop<-function(outputFileHtmlCon, mapYear) {
   writeLines(paste0('  color: #996600;'), outputFileHtmlCon)
   writeLines(paste0('  font-family: verdana;'), outputFileHtmlCon)
   writeLines(paste0('}'), outputFileHtmlCon)
+  writeLines(paste0('li {'), outputFileHtmlCon)
+  writeLines(paste0('  color: #996600;'), outputFileHtmlCon)
+  writeLines(paste0('  font-family: verdana;'), outputFileHtmlCon)
+  writeLines(paste0('}'), outputFileHtmlCon)  
   writeLines(paste0('th {'), outputFileHtmlCon)
   writeLines(paste0('  text-align: right;'), outputFileHtmlCon)
   writeLines(paste0('  font-family: verdana;'), outputFileHtmlCon)
@@ -109,8 +113,8 @@ genPageTitle<-function(mapYear){
 }
 
 genHTMLRailOnly<-function(outputFileHtmlCon,railYear){
-  print(paste0("To map ", mapYear, ", adding: "))
-  print(output_dbRows_route_style[i_route_style, 1])
+  #print(paste0("To map for ", railYear, ", adding: "))
+  #print(output_dbRows_route_style[i_route_style, 1])
   routeLayerName <- paste0("RailOnly",railYear, "Layer")
   
   writeLines(paste0(""), outputFileHtmlCon)
@@ -157,6 +161,51 @@ genHTMLRailOnly<-function(outputFileHtmlCon,railYear){
 }
 
 
+genHTMLMajorChanges<-function(outputFileHtmlCon,changeYear){
+  #print(paste0("To map ", changeYear, ", adding: "))
+  
+  routeLayerName <- paste0("layer",changeYear)
+  
+  writeLines(paste0(""), outputFileHtmlCon)
+  writeLines(paste0("// layer for ",routeLayerName), outputFileHtmlCon)
+  writeLines(paste0("var ",routeLayerName,";"), outputFileHtmlCon)
+  
+  writeLines(paste0("      $.ajax({"), outputFileHtmlCon)
+  writeLines(paste0("        type: 'POST',"), outputFileHtmlCon)
+  #There are 2 files for 1954 - use the December one
+  if(changeYear==1954){
+    writeLines(paste0("        url: '",changeYear,"_December.geojson',"), outputFileHtmlCon)
+  }else{
+    writeLines(paste0("        url: '",changeYear,".geojson',"), outputFileHtmlCon)
+  }
+  writeLines(paste0("        dataType: 'json',"), outputFileHtmlCon)
+  writeLines(paste0("        success: function(response) {"), outputFileHtmlCon)
+  writeLines(paste0("          ",routeLayerName," = L.geoJson(response, {"), outputFileHtmlCon)
+  
+  #writeLines(paste0("             onEachFeature: function (feature, layer) {"), outputFileHtmlCon)
+  #if(changeYear<=1948){
+  #  writeLines(paste0("                 layer.bindPopup('<h3>Route Name: '+feature.properties.RTE_NAME+'</h3><p>'+feature.properties.RTE_TYPE+'</p><p>'+feature.properties.MODE+'</p>');"), outputFileHtmlCon)  
+  #}else{
+  #  writeLines(paste0("                 layer.bindPopup('<h3>Route Number: '+feature.properties.RTE_NUM+'</h3><p>'+feature.properties.RTE_TYPE+'</p><p>'+feature.properties.MODE+'</p>');"), outputFileHtmlCon)  
+  #}
+  #
+  #writeLines(paste0("               }"), outputFileHtmlCon)
+  writeLines(paste0("             });"), outputFileHtmlCon)
+  writeLines(paste0("          ",routeLayerName,".setStyle({"), outputFileHtmlCon)
+  writeLines(paste0("            color: 'blue',"), outputFileHtmlCon)
+  writeLines(paste0("            weight: 3,"), outputFileHtmlCon)
+  writeLines(paste0('            opacity: 1'), outputFileHtmlCon)
+  writeLines(paste0("          });"), outputFileHtmlCon)
+  writeLines(paste0("          ",routeLayerName,".addTo(map);"), outputFileHtmlCon)
+  writeLines(paste0("          controlLayers.addOverlay(",routeLayerName,", '<span style=",'"color: blue"',">",changeYear," All Routes</span>');"), outputFileHtmlCon)
+  writeLines(paste0("        }"), outputFileHtmlCon)
+  writeLines(paste0("      });"), outputFileHtmlCon)
+  writeLines(paste0(""), outputFileHtmlCon)
+}
+
+
+
+
 genHTMLPageLinks<-function(outputFileHtmlCon,pageLinks){
    writeLines(paste0("<h2>Links to maps by year</h2>"), outputFileHtmlCon)
    writeLines(paste0("<p>",pageLinks,"</p>"), outputFileHtmlCon)
@@ -191,10 +240,8 @@ genHTMLLeafletClickChoiceFunctions<-function(outputFileHtmlCon,pageLinks){
 }
 
 genHTMLFootnotes<-function(outputFileHtmlCon,generateYear){
-  #1. “Privacy Policy,” Privacy & Terms, Google, last modified April 17, 2017, https://www.google.com/policies/privacy/.
-  #2. “History,” Columbia University, accessed May 15, 2017, http://www.columbia.edu/content/history.html.
   
-  writeLines(paste0('<p><a name="roctranspogis">1. OC Transpo, OC Transpo Transit Routes 1929-2015, ESRI Shapefiles, Ottawa, Ontario: MacOdrum Library, Carleton University, August 29, 2018.</a></p>'), outputFileHtmlCon)
+  writeLines(paste0('<p><a name="roctranspogis">1. OC Transpo, OC Transpo Transit Routes 1929-2015, ESRI Shapefiles, Ottawa, Ontario: MacOdrum Library, Carleton University, August 29, 2018.</a> <a href="https://library.carleton.ca/find/gis/geospatial-data/oc-transpo-transit-routes">https://library.carleton.ca/find/gis/geospatial-data/oc-transpo-transit-routes</a>.</p>'), outputFileHtmlCon)
   writeLines(paste0('<p><a name="rnccue">2. National Capital Commission, Urban Growth (National Capital Commission) - 1810-2012 Intermittent, ESRI Shapefiles, Ottawa, Ontario: MacOdrum Library, Carleton University, August 29, 2018.</a></p>'), outputFileHtmlCon)
   
   #National Defence Map references
@@ -220,6 +267,41 @@ genHTMLFootnotes<-function(outputFileHtmlCon,generateYear){
       writeLines(paste0('<p><a name="rcensus1971">7. Statistics Canada, "Canadian 1971 Census Profile (Census Tract Level)," Canadian Census Analyser, Toronto:Ontario. Accessed April 13, 2019.</a><a href="http://dc1.chass.utoronto.ca/census/index.html">http://dc1.chass.utoronto.ca/census/index.html</a></p>'), outputFileHtmlCon) 
     } 
   }
+  
+  # Facts table references - footnotes
+  # R needs a full path to find the settings file.
+  #rmariadb.settingsfile<-"C:\\ProgramData\\MySQL\\MySQL Server 8.0\\oc_transpo_maps.cnf"
+  
+  #rmariadb.db<-"oc_transpo_maps"
+  #footnotesDb<-dbConnect(RMariaDB::MariaDB(),default.file=rmariadb.settingsfile,group=rmariadb.db) 
+
+  output_query_footnotes<-paste0("SELECT oc_transpo_maps.tbl_footnotes.footnote_number,oc_transpo_maps.tbl_footnotes.footnote_text FROM oc_transpo_maps.tbl_facts LEFT JOIN oc_transpo_maps.tbl_footnotes ON oc_transpo_maps.tbl_facts.footnote_number = oc_transpo_maps.tbl_footnotes.footnote_number WHERE oc_transpo_maps.tbl_facts.fact_map_year_start<=",generateYear," AND oc_transpo_maps.tbl_facts.fact_map_year_end>=",generateYear," GROUP BY oc_transpo_maps.tbl_footnotes.footnote_number ORDER BY oc_transpo_maps.tbl_footnotes.footnote_number;")
+  
+  #A kluge to use 1953, but worth it to avoid complexity
+  if(generateYear==1953 | generateYear==1954){
+    output_query_footnotes<-paste0("SELECT oc_transpo_maps.tbl_footnotes.footnote_number,oc_transpo_maps.tbl_footnotes.footnote_text FROM oc_transpo_maps.tbl_facts LEFT JOIN oc_transpo_maps.tbl_footnotes ON oc_transpo_maps.tbl_facts.footnote_number = oc_transpo_maps.tbl_footnotes.footnote_number WHERE oc_transpo_maps.tbl_facts.fact_map_year_start<=1954 AND oc_transpo_maps.tbl_facts.fact_map_year_end>=1954 GROUP BY oc_transpo_maps.tbl_footnotes.footnote_number ORDER BY oc_transpo_maps.tbl_footnotes.footnote_number;")
+  }
+  #Special maps - generate all footnotes
+  if(generateYear==9999){
+    output_query_footnotes<-paste0("SELECT oc_transpo_maps.tbl_footnotes.footnote_number,oc_transpo_maps.tbl_footnotes.footnote_text FROM oc_transpo_maps.tbl_facts LEFT JOIN oc_transpo_maps.tbl_footnotes ON oc_transpo_maps.tbl_facts.footnote_number = oc_transpo_maps.tbl_footnotes.footnote_number WHERE true GROUP BY oc_transpo_maps.tbl_footnotes.footnote_number ORDER BY oc_transpo_maps.tbl_footnotes.footnote_number;")
+  }
+  #print(output_query_footnotes)
+  
+  output_rs_footnotes = dbSendQuery(routesDb,output_query_footnotes)
+  output_dbRows_footnotes<-dbFetch(output_rs_footnotes, 999999)
+  if (nrow(output_dbRows_footnotes)==0){
+    #print (paste0("Zero footnote rows for ",generateYear))
+    dbClearResult(output_rs_footnotes)
+  } else {
+    
+    for (i_footnotes in 1:nrow(output_dbRows_footnotes)) {
+      writeLines(paste0('<p><a name="footnote',output_dbRows_footnotes[i_footnotes, 1],'">',output_dbRows_footnotes[i_footnotes, 1]," ", output_dbRows_footnotes[i_footnotes, 2],'</a></p>'), outputFileHtmlCon)
+    }
+    
+    dbClearResult(output_rs_footnotes)
+  }
+  #dbDisconnect(footnotesDb)  
+  
 }
 
 library(RMariaDB)
@@ -265,13 +347,17 @@ for (generateYear in 1929:2015){
 #Add two extra page links
 #pageLinks<-paste0(pageLinks,"<a href='urbanextent.html'>Urban Extent 1925-2012</a> | ")
 pageLinks<-paste0(pageLinks,"<a href='railonly.html'>Rail routes only 1929-2015</a> | ")
+pageLinks<-paste0(pageLinks,"<a href='majorchanges.html'>Major Changes 1929-2015</a> | ")
+pageLinks<-paste0(pageLinks,"<a href='timeline.html'>Timeline 1929-2015</a> | ")
 pageLinks<-paste0(pageLinks,"<a href='index.html'>Landing page</a>")
 
+#Javascript objects to hold data for use on the animated pages like railonly and major changes.
 railOnlyJavaScriptObjects="var railOnly = new Object();\n"
 railOnlyArrayCount=0
+majorChangesJavaScriptObjects="var majorChanges = new Object();\n"
+majorChangesArrayCount=0
+
 for (generateYear in 1929:2015){
-  
-  
   
   #There are 2 files for 1954, so do this twice for June and Dec.
   mapYear=generateYear
@@ -293,7 +379,7 @@ for (generateYear in 1929:2015){
     dbClearResult(output_rs)
     
   } else {
-    print(paste0("Generating maps and geojson for year ", mapYear))  
+    #print(paste0("Generating maps and geojson for year ", mapYear))  
     #which urban growth year to use?
     urbanGrowthYear=1925
     if(generateYear>=1929 & generateYear<1945){
@@ -456,6 +542,28 @@ for (generateYear in 1929:2015){
     
     genHTMLUrbanExtent(outputFileHtmlCon,urbanGrowthYear)    
     
+    
+    #marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+    #var marker = L.marker([51.5, -0.09]).addTo(mymap);
+    
+    output_query_markers<-paste0("SELECT tbl_facts.fact,tbl_facts.footnote_number,tbl_markers.marker_latitude,tbl_markers.marker_longitude,tbl_markers.id FROM oc_transpo_maps.tbl_markers LEFT JOIN tbl_facts ON tbl_markers.fact_id = tbl_facts.id WHERE marker_map_year_start<=",generateYear," AND marker_map_year_end>=",generateYear,";")
+    #A kluge to use 1953, but worth it to avoid complexity
+    if(generateYear==1953 | generateYear==1954){
+      output_query_markers<-paste0("SELECT tbl_facts.fact,tbl_facts.footnote_number,tbl_markers.marker_latitude,tbl_markers.marker_longitude,tbl_markers.id FROM oc_transpo_maps.tbl_markers LEFT JOIN tbl_facts ON tbl_markers.fact_id = tbl_facts.id WHERE marker_map_year_start<=1954 AND marker_map_year_end>=1954;")
+    }
+    
+    output_rs_markers = dbSendQuery(routesDb,output_query_markers)
+    output_dbRows_markers<-dbFetch(output_rs_markers, 999999)
+    if (nrow(output_dbRows_markers)==0){
+      print (paste0("Zero rows for ",generateYear))
+      dbClearResult(output_rs_markers)
+    } else {
+      for (i_facts in 1:nrow(output_dbRows_markers)) {
+        writeLines(paste0("var marker",output_dbRows_markers[i_facts, 5],"= L.marker([",output_dbRows_markers[i_facts, 3],", ",output_dbRows_markers[i_facts, 4],"]).addTo(map);"), outputFileHtmlCon)
+        writeLines(paste0("marker",output_dbRows_markers[i_facts, 5],".bindPopup('<p>",output_dbRows_markers[i_facts, 1],' <a href="#footnote',output_dbRows_markers[i_facts, 2],'"><sup>',output_dbRows_markers[i_facts, 2],"</sup></a></p><p>The route map for this bus line is not known for this year.</p>').openPopup();"), outputFileHtmlCon)
+      }
+      dbClearResult(output_rs_facts)
+    }
 
     #Write a layer for each route type
     output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE YEAR=",mapYear," GROUP BY RTE_TYPE ORDER BY RTE_TYPE DESC;")
@@ -473,12 +581,12 @@ for (generateYear in 1929:2015){
     output_rs_route_style = dbSendQuery(routesDb,output_query_route_style)
     output_dbRows_route_style<-dbFetch(output_rs_route_style, 999999)
     if (nrow(output_dbRows_route_style)==0){
-      print (paste0("Zero rows for ",mapYear))
+      #print (paste0("Zero rows for ",mapYear))
       dbClearResult(output_rs_route_style)
     } else {
       for (i_route_style in 1:nrow(output_dbRows_route_style)) {
-        print(paste0("To map ", mapYear, ", adding: "))
-        print(output_dbRows_route_style[i_route_style, 1])
+        print(paste0("To map ", mapYear, ", adding: ",output_dbRows_route_style[i_route_style, 1]))
+
         routeLayerName <- paste0("layer",gsub("-","",gsub(" ","",output_dbRows_route_style[i_route_style, 1])))
         
         writeLines(paste0(""), outputFileHtmlCon)
@@ -507,7 +615,7 @@ for (generateYear in 1929:2015){
         writeLines(paste0("          ",routeLayerName,".setStyle({"), outputFileHtmlCon)
         writeLines(paste0("            color: '",output_dbRows_route_style[i_route_style, 6],"',"), outputFileHtmlCon)
         routeTypes <- paste0(routeTypes,"<span style=",'"color:',output_dbRows_route_style[i_route_style, 6],'"',">",output_dbRows_route_style[i_route_style, 1]," ___________</span><br>")
-        writeLines(paste0("            weight: 2,"), outputFileHtmlCon)
+        writeLines(paste0("            weight: 3,"), outputFileHtmlCon)
         writeLines(paste0('            opacity: 1'), outputFileHtmlCon)
         writeLines(paste0("          });"), outputFileHtmlCon)
         writeLines(paste0("          ",routeLayerName,".addTo(map);"), outputFileHtmlCon)
@@ -524,8 +632,38 @@ for (generateYear in 1929:2015){
     writeLines(paste0("//    });"), outputFileHtmlCon)
     writeLines(paste0("  };"), outputFileHtmlCon)
     writeLines(paste0("</script>"), outputFileHtmlCon)
+    
+    
+    if(censusYear==1961 | censusYear==1971){
+      if(censusYear==1961){
+        writeLines(paste0('<p>Census Data: % population owning no automobile.<a href="#rcensus1961"><sup>6</sup></a></p>'), outputFileHtmlCon)
+      }
+      if(censusYear==1971){
+        writeLines(paste0('<p>Census Data: % population owning no automobile.<a href="#rcensus1971"><sup>7</sup></a></p>'), outputFileHtmlCon)
+      }
+      writeLines(paste0("<table><tr>"), outputFileHtmlCon)
+      writeLines(paste0("<script>"), outputFileHtmlCon)
+      writeLines(paste0("for(counter=0;counter<=100;counter=counter+2){"), outputFileHtmlCon)
+      
+      writeLines(paste0("document.write('<td bgcolor='+chloroplethValue(counter)+'>&nbsp;&nbsp;</td>');"), outputFileHtmlCon)
+      writeLines(paste0(""), outputFileHtmlCon)
+      writeLines(paste0("}"), outputFileHtmlCon)
+      writeLines(paste0(""), outputFileHtmlCon)
+      writeLines(paste0(""), outputFileHtmlCon)
+      writeLines(paste0(""), outputFileHtmlCon)
+      writeLines(paste0(""), outputFileHtmlCon)
+      writeLines(paste0("</script>"), outputFileHtmlCon)
+      writeLines(paste0("</tr>"), outputFileHtmlCon)
+      writeLines(paste0("<tr>"), outputFileHtmlCon)
+      for(tdCounter in 1:10){
+        writeLines(paste0("<td colspan=5>",tdCounter*10,"%</td>"), outputFileHtmlCon)
+      }
+      writeLines(paste0("</tr>"), outputFileHtmlCon)
+      writeLines(paste0("</table>"), outputFileHtmlCon)
+    }
     writeLines(paste0('<h1>',genPageTitle(mapYear),'</h1>'), outputFileHtmlCon)
     writeLines(paste0('<p><a href="references.pdf">References used for this project.</a></p>'), outputFileHtmlCon)
+    
     writeLines(paste0("<h2>Legend</h2>"), outputFileHtmlCon)
     writeLines(paste0("<h3>Route types</h3>"), outputFileHtmlCon)
     writeLines(paste0('<p>',routeTypes,'<a href="#roctranspogis"><sup>1</sup></a></p>'), outputFileHtmlCon)
@@ -552,34 +690,7 @@ for (generateYear in 1929:2015){
     }
     
     
-    if(censusYear==1961 | censusYear==1971){
-      writeLines(paste0("<h3>Census Data</h3>"), outputFileHtmlCon)
-      if(censusYear==1961){
-        writeLines(paste0('<p>% population owning no automobile.<a href="#rcensus1961"><sup>6</sup></a></p>'), outputFileHtmlCon)
-      }
-      if(censusYear==1971){
-        writeLines(paste0('<p>% population owning no automobile.<a href="#rcensus1971"><sup>7</sup></a></p>'), outputFileHtmlCon)
-      }
-      writeLines(paste0("<table><tr>"), outputFileHtmlCon)
-      writeLines(paste0("<script>"), outputFileHtmlCon)
-      writeLines(paste0("for(counter=0;counter<=100;counter=counter+2){"), outputFileHtmlCon)
-      
-      writeLines(paste0("document.write('<td bgcolor='+chloroplethValue(counter)+'>&nbsp;&nbsp;</td>');"), outputFileHtmlCon)
-      writeLines(paste0(""), outputFileHtmlCon)
-      writeLines(paste0("}"), outputFileHtmlCon)
-      writeLines(paste0(""), outputFileHtmlCon)
-      writeLines(paste0(""), outputFileHtmlCon)
-      writeLines(paste0(""), outputFileHtmlCon)
-      writeLines(paste0(""), outputFileHtmlCon)
-      writeLines(paste0("</script>"), outputFileHtmlCon)
-      writeLines(paste0("</tr>"), outputFileHtmlCon)
-      writeLines(paste0("<tr>"), outputFileHtmlCon)
-      for(tdCounter in 1:10){
-      writeLines(paste0("<td colspan=5>",tdCounter*10,"%</td>"), outputFileHtmlCon)
-      }
-      writeLines(paste0("</tr>"), outputFileHtmlCon)
-      writeLines(paste0("</table>"), outputFileHtmlCon)
-    }
+
     
     genHTMLPageLinks(outputFileHtmlCon,pageLinks)
     
@@ -604,11 +715,11 @@ for (generateYear in 1929:2015){
     if(generateYear<=1948){
       output_query_route_style<-paste0("SELECT tbl_route_maps.RTE_TYPE, tbl_route_maps.RTE_NAME, tbl_route_maps.RTE_TYPE_GROOMED, tbl_route_types.RTE_TYPE_MODE, tbl_route_types.RTE_TYPE_MODE_CODE, tbl_route_types.RTE_TYPE_MODE_CODE2, tbl_route_types.RTE_TYPE_MAP_COLOR FROM tbl_route_maps LEFT JOIN tbl_route_types ON tbl_route_maps.RTE_TYPE_GROOMED = tbl_route_types.RTE_TYPE WHERE YEAR=",mapYear," ORDER BY RTE_NUM,RTE_TYPE;")
     }
-    print(output_query_route_style)
+    #print(output_query_route_style)
     output_rs_route_style = dbSendQuery(routesDb,output_query_route_style)
     output_dbRows_route_style<-dbFetch(output_rs_route_style, 999999)
     if (nrow(output_dbRows_route_style)==0){
-      print (paste0("Zero rows for ",mapYear))
+      #print (paste0("Zero rows for ",mapYear))
       dbClearResult(output_rs_route_style)
     } else {
       for (i_route_style in 1:nrow(output_dbRows_route_style)) {
@@ -623,13 +734,54 @@ for (generateYear in 1929:2015){
     }
     
     writeLines(paste0("</table>"), outputFileHtmlCon)
+    
+    
+    
+
+
+    output_query_facts<-paste0("SELECT fact,footnote_number,fact_year FROM oc_transpo_maps.tbl_facts WHERE fact_map_year_start<=",generateYear," AND fact_map_year_end>=",generateYear,";")
+    #A kluge to use 1953, but worth it to avoid complexity
+    if(generateYear==1953 | generateYear==1954){
+      output_query_facts<-paste0("SELECT fact,footnote_number,fact_year FROM oc_transpo_maps.tbl_facts WHERE fact_map_year_start<=1954 AND fact_map_year_end>=1954;")
+    }
+    
+    output_rs_facts = dbSendQuery(routesDb,output_query_facts)
+    output_dbRows_facts<-dbFetch(output_rs_facts, 999999)
+    if (nrow(output_dbRows_facts)==0){
+      print (paste0("Zero rows for ",generateYear))
+      dbClearResult(output_rs_facts)
+    } else {
+      writeLines(paste0("<h2>Facts and Observations.</h2>"), outputFileHtmlCon)
+      writeLines(paste0("<ul>"), outputFileHtmlCon)
+      for (i_facts in 1:nrow(output_dbRows_facts)) {
+        writeLines(paste0("<li>",output_dbRows_facts[i_facts, 3],": ",output_dbRows_facts[i_facts, 1],'<a href="#footnote',output_dbRows_facts[i_facts, 2],'"><sup>',output_dbRows_facts[i_facts, 2],'</sup></a></p>'), outputFileHtmlCon)
+      }
+      writeLines(paste0("</ul>"), outputFileHtmlCon)
+      dbClearResult(output_rs_facts)
+    }
+    
+    
     writeLines(paste0("<hr>"), outputFileHtmlCon)
     genHTMLFootnotes(outputFileHtmlCon,generateYear)
     writeLines(paste0("</body>"), outputFileHtmlCon)
     writeLines(paste0("</html>"), outputFileHtmlCon)
     close(outputFileHtmlCon)
+    #dbDisconnect(routesDb)
+  
+    
+    
+    
+      
+    #--------------------------------------------
+    # Animated maps - Javascript objects
+    #--------------------------------------------
     
     # update this value to hold objects used for the animated rail only map.
+    if(generateYear==1929|generateYear==1951|generateYear==1962|generateYear==1983|generateYear==1986|generateYear==1996){
+      majorChangesJavaScriptObjects<-paste0(majorChangesJavaScriptObjects, 'majorChanges[',majorChangesArrayCount,']=({mapYear:',generateYear,',geojsonMajorChangesYear:',generateYear,',geojsonUrbanGrowthYear:',urbanGrowthYear,'});','\n')
+      majorChangesArrayCount=majorChangesArrayCount+1
+    }
+    
     if(generateYear<=1959 & generateYear!=1953){
       railOnlyJavaScriptObjects<-paste0(railOnlyJavaScriptObjects, 'railOnly[',railOnlyArrayCount,']=({mapYear:',generateYear,',geojsonRailYear:',generateYear,',geojsonUrbanGrowthYear:',urbanGrowthYear,'});','\n')
       railOnlyArrayCount<-railOnlyArrayCount+1
@@ -648,7 +800,39 @@ for (generateYear in 1929:2015){
     }
   }
 }
-dbDisconnect(routesDb)
+
+#Make a javaScript object to hold facts 
+factsJavaScriptObjects="var facts = {\n"
+
+
+output_query_facts<-paste0("SELECT fact,footnote_number,fact_year,fact_map_year_start,fact_map_year_end FROM oc_transpo_maps.tbl_facts WHERE true ORDER BY fact_map_year_start, fact_year;")
+output_rs_facts = dbSendQuery(routesDb,output_query_facts)
+output_dbRows_facts<-dbFetch(output_rs_facts, 999999)
+if (nrow(output_dbRows_facts)==0){
+  print (paste0("Zero rows for timeline"))
+  dbClearResult(output_rs_facts)
+} else {
+  timeLineYear=0
+  timeLineMapYear=0
+  for (i_facts in 1:nrow(output_dbRows_facts)) {
+    if(timeLineMapYear!=output_dbRows_facts[i_facts, 4]){
+      if(timeLineMapYear!=0){
+        factsJavaScriptObjects<-paste0(factsJavaScriptObjects,"',\n")
+      }
+      factsJavaScriptObjects<-paste0(factsJavaScriptObjects,output_dbRows_facts[i_facts, 4], ":'")
+    }
+    timeLineMapYear=output_dbRows_facts[i_facts, 4]
+    if(timeLineYear!=output_dbRows_facts[i_facts, 3]){
+      factsJavaScriptObjects<-paste0(factsJavaScriptObjects,"<b>",output_dbRows_facts[i_facts, 3],":</b></p>")
+    }
+    timeLineYear=output_dbRows_facts[i_facts, 3]
+    factsJavaScriptObjects<-paste0(factsJavaScriptObjects,"<p>",output_dbRows_facts[i_facts, 1],' <a href="#footnote',output_dbRows_facts[i_facts, 2],'"><sup>',output_dbRows_facts[i_facts, 2],'</sup></a></p>')
+  }
+  dbClearResult(output_rs_facts)
+}
+
+factsJavaScriptObjects<-paste0(factsJavaScriptObjects,"'}\n")
+
 
 #--------------------------------------------
 # Urban Extent Only
@@ -658,7 +842,7 @@ outputFileHtml <- paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-dat
 outputFileHtmlCon<-file(outputFileHtml, open = "w")
 
 genMapHTMLTop(outputFileHtmlCon, "Urban extent 1929-2015")
-genMapHTMLScriptTop(outputFileHtmlCon, mapYear)
+genMapHTMLScriptTop(outputFileHtmlCon, "Urban extent 1929-2015")
 
 writeLines(paste0('  window.onload = function() {'), outputFileHtmlCon)
 writeLines(paste0("    var basemap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {"), outputFileHtmlCon)
@@ -732,7 +916,7 @@ writeLines(paste0('<input type="button" onClick="clickAll();" value="check all">
 genHTMLPageLinks(outputFileHtmlCon,pageLinks)
 
 writeLines(paste0("<hr>"), outputFileHtmlCon)
-genHTMLFootnotes(outputFileHtmlCon,generateYear)
+genHTMLFootnotes(outputFileHtmlCon,9999)
 writeLines(paste0("</body>"), outputFileHtmlCon)
 writeLines(paste0("</html>"), outputFileHtmlCon)
 close(outputFileHtmlCon)
@@ -747,7 +931,7 @@ outputFileHtml <- paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-dat
 outputFileHtmlCon<-file(outputFileHtml, open = "w")
 
 genMapHTMLTop(outputFileHtmlCon, "Rail only 1929-2015")
-genMapHTMLScriptTop(outputFileHtmlCon, mapYear)
+genMapHTMLScriptTop(outputFileHtmlCon, "Rail only 1929-2015")
 
 writeLines(paste0('  window.onload = function() {'), outputFileHtmlCon)
 writeLines(paste0("    var basemap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {"), outputFileHtmlCon)
@@ -788,6 +972,7 @@ writeLines(paste0("      controlLayers.addOverlay(basemap, '",basemapTitle,"');"
 writeLines(paste0("      "), outputFileHtmlCon)
 writeLines(paste0("  };"), outputFileHtmlCon)
 writeLines(paste0(railOnlyJavaScriptObjects), outputFileHtmlCon)
+writeLines(paste0(factsJavaScriptObjects), outputFileHtmlCon)
 writeLines(paste0("var controlChoices=document.getElementsByClassName('leaflet-control-layers-selector');"), outputFileHtmlCon)
 writeLines(paste0("var animLayer=0;"), outputFileHtmlCon)
 writeLines(paste0("var animRailYear=-1;"), outputFileHtmlCon)
@@ -842,6 +1027,11 @@ writeLines(paste0("  animRailYear=animRailYear+forward;"), outputFileHtmlCon)
 writeLines(paste0("  if(animRailYear>44){animRailYear=0;}"), outputFileHtmlCon)
 writeLines(paste0("  if(animRailYear<0){animRailYear=44;}"), outputFileHtmlCon)
 writeLines(paste0("  document.getElementById('mapYear').innerHTML = railOnly[animRailYear].mapYear;"), outputFileHtmlCon)
+writeLines(paste0('  if(typeof facts[railOnly[animRailYear].mapYear] == "undefined"){'), outputFileHtmlCon)
+writeLines(paste0("     document.getElementById('mapNotes').innerHTML = '';"), outputFileHtmlCon)
+writeLines(paste0('   }else{'), outputFileHtmlCon)
+writeLines(paste0("      document.getElementById('mapNotes').innerHTML = '<h3>Map Notes</h3>'+facts[railOnly[animRailYear].mapYear];"), outputFileHtmlCon)
+writeLines(paste0('   }'), outputFileHtmlCon)  
 writeLines(paste0("  document.getElementById('urbanExtentMapYear').innerHTML = railOnly[animRailYear].geojsonUrbanGrowthYear;"), outputFileHtmlCon)
 writeLines(paste0("  if(railOnly[animRailYear].mapYear>=1929){"), outputFileHtmlCon)
 writeLines(paste0("    ue='Urban Extent '+railOnly[animRailYear].geojsonUrbanGrowthYear;"), outputFileHtmlCon)
@@ -890,14 +1080,178 @@ writeLines(paste0('     <input type="button" onClick="stepAnimateRail(1);" value
 writeLines(paste0('     <input type="button" onClick="stepAnimateRail(-1);" value="Rail Animation - Backward in time.">'), outputFileHtmlCon)
 writeLines(paste0('</td></tr>'), outputFileHtmlCon)
 writeLines(paste0('</table>'), outputFileHtmlCon)
+writeLines(paste0('<p><div id="mapNotes"></div></p>'), outputFileHtmlCon)
 
 genHTMLPageLinks(outputFileHtmlCon,pageLinks)
 
 writeLines(paste0("<hr>"), outputFileHtmlCon)
-genHTMLFootnotes(outputFileHtmlCon,generateYear)
+genHTMLFootnotes(outputFileHtmlCon,9999)
 writeLines(paste0("</body>"), outputFileHtmlCon)
 writeLines(paste0("</html>"), outputFileHtmlCon)
 close(outputFileHtmlCon)
+
+
+
+
+#--------------------------------------------
+# Major Changes
+#--------------------------------------------
+
+outputFileHtml <- paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\majorchanges.html")
+outputFileHtmlCon<-file(outputFileHtml, open = "w")
+
+genMapHTMLTop(outputFileHtmlCon, "Major Changes 1929-2015")
+genMapHTMLScriptTop(outputFileHtmlCon, "Major Changes 1929-2015")
+
+writeLines(paste0('  window.onload = function() {'), outputFileHtmlCon)
+writeLines(paste0("    var basemap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {"), outputFileHtmlCon)
+writeLines(paste0("      attribution: '&copy; ",'<a href="http://osm.org/copyright">OpenStreetMap</a>',' contributors | <a href="https://library.carleton.ca/find/gis/geospatial-data/oc-transpo-transit-routes">MacOdrum Library</a>',"'"), outputFileHtmlCon)
+writeLines(paste0("    });"), outputFileHtmlCon)
+basemapTitle="Open Street Map Today"
+
+genMapHTMLMapTop(outputFileHtmlCon)
+
+genHTMLUrbanExtent(outputFileHtmlCon,1925)
+genHTMLUrbanExtent(outputFileHtmlCon,1945)
+genHTMLUrbanExtent(outputFileHtmlCon,1956)
+genHTMLUrbanExtent(outputFileHtmlCon,1976)
+genHTMLUrbanExtent(outputFileHtmlCon,1996)
+genHTMLUrbanExtent(outputFileHtmlCon,2008)
+genHTMLUrbanExtent(outputFileHtmlCon,2012)
+genHTMLMajorChanges(outputFileHtmlCon,1929)
+genHTMLMajorChanges(outputFileHtmlCon,1951)
+genHTMLMajorChanges(outputFileHtmlCon,1962)
+genHTMLMajorChanges(outputFileHtmlCon,1983)
+genHTMLMajorChanges(outputFileHtmlCon,1986)
+genHTMLMajorChanges(outputFileHtmlCon,1996)
+#genHTMLMajorChanges(outputFileHtmlCon,2001)
+
+writeLines(paste0("      controlLayers.addOverlay(basemap, '",basemapTitle,"');"), outputFileHtmlCon)
+writeLines(paste0("      "), outputFileHtmlCon)
+writeLines(paste0("  };"), outputFileHtmlCon)
+writeLines(paste0(majorChangesJavaScriptObjects), outputFileHtmlCon)
+writeLines(paste0(factsJavaScriptObjects), outputFileHtmlCon)
+writeLines(paste0("var controlChoices=document.getElementsByClassName('leaflet-control-layers-selector');"), outputFileHtmlCon)
+writeLines(paste0("var animLayer=0;"), outputFileHtmlCon)
+writeLines(paste0("var animMajorChangesYear=-1;"), outputFileHtmlCon)
+
+writeLines(paste0("// The years of urban growth data and their order."), outputFileHtmlCon)
+writeLines(paste0("var urbanExtentYears = ["), outputFileHtmlCon)
+writeLines(paste0("[1925, 1],"), outputFileHtmlCon)
+writeLines(paste0("[1945, 2],"), outputFileHtmlCon)
+writeLines(paste0("[1956, 3],"), outputFileHtmlCon)
+writeLines(paste0("[1976, 4],"), outputFileHtmlCon)
+writeLines(paste0("[1996, 5],"), outputFileHtmlCon)
+writeLines(paste0("[2008, 6],"), outputFileHtmlCon)
+writeLines(paste0("[2012, 7]"), outputFileHtmlCon)
+writeLines(paste0("];"), outputFileHtmlCon)
+writeLines(paste0("// The years of urban growth data may be out of order on the Leaflet control. "), outputFileHtmlCon)
+writeLines(paste0("// Loop through the control, see where each year is and set the year's order in the list."), outputFileHtmlCon)
+writeLines(paste0("function checkOrder(){"), outputFileHtmlCon)
+writeLines(paste0("   controlChoices=document.getElementsByClassName('leaflet-control-layers-selector');"), outputFileHtmlCon)
+writeLines(paste0("   for(cc2 = 0;cc2<urbanExtentYears.length;cc2=cc2+1){"), outputFileHtmlCon)
+writeLines(paste0("      ue='Urban Extent '+urbanExtentYears[cc2][0];"), outputFileHtmlCon)
+writeLines(paste0("      ue=ue.trim();"), outputFileHtmlCon)
+writeLines(paste0("      for(cc = 1;cc<controlChoices.length;cc=cc+1){"), outputFileHtmlCon)
+writeLines(paste0("         cchoice=controlChoices[cc].labels[0].innerText;"), outputFileHtmlCon)
+writeLines(paste0("         cchoice=cchoice.trim();"), outputFileHtmlCon)
+writeLines(paste0('         if(ue===cchoice){'), outputFileHtmlCon)
+writeLines(paste0("            urbanExtentYears[cc2][1]=cc;"), outputFileHtmlCon)
+writeLines(paste0("            cc=controlChoices.length;"), outputFileHtmlCon)
+writeLines(paste0("         }"), outputFileHtmlCon)
+writeLines(paste0("      }"), outputFileHtmlCon)
+writeLines(paste0("   }"), outputFileHtmlCon)
+writeLines(paste0("}"), outputFileHtmlCon)
+
+genHTMLLeafletClickChoiceFunctions(outputFileHtmlCon,pageLinks)
+
+
+writeLines(paste0("function stepAnimate(forward){"), outputFileHtmlCon)
+writeLines(paste0("   controlChoices=document.getElementsByClassName('leaflet-control-layers-selector');"), outputFileHtmlCon)
+writeLines(paste0("   unClickAll();"), outputFileHtmlCon)
+writeLines(paste0("   checkOrder();"), outputFileHtmlCon)
+writeLines(paste0("   animLayer=animLayer+forward;"), outputFileHtmlCon)	
+writeLines(paste0("   if(animLayer>7){animLayer=1;}"), outputFileHtmlCon)
+writeLines(paste0("   if(animLayer<1){animLayer=7;}"), outputFileHtmlCon)
+writeLines(paste0("   clickChoice(controlChoices[urbanExtentYears[animLayer-1][1]]);"), outputFileHtmlCon)
+writeLines(paste0('   document.getElementById("urbanExtentMapYear").innerHTML = urbanExtentYears[animLayer-1][0];'), outputFileHtmlCon)
+writeLines(paste0("}"), outputFileHtmlCon)
+
+
+writeLines(paste0("function stepAnimateMajorChanges(forward){"), outputFileHtmlCon)
+writeLines(paste0("  controlChoices=document.getElementsByClassName('leaflet-control-layers-selector');"), outputFileHtmlCon)
+writeLines(paste0("  unClickAll();"), outputFileHtmlCon)
+writeLines(paste0("  animMajorChangesYear=animMajorChangesYear+forward;"), outputFileHtmlCon)
+writeLines(paste0("  if(animMajorChangesYear>5){animMajorChangesYear=0;}"), outputFileHtmlCon)
+writeLines(paste0("  if(animMajorChangesYear<0){animMajorChangesYear=5;}"), outputFileHtmlCon)
+
+writeLines(paste0("  document.getElementById('mapYear').innerHTML = majorChanges[animMajorChangesYear].mapYear;"), outputFileHtmlCon)
+writeLines(paste0('  if(typeof facts[majorChanges[animMajorChangesYear].mapYear] == "undefined"){'), outputFileHtmlCon)
+writeLines(paste0("     document.getElementById('mapNotes').innerHTML = '';"), outputFileHtmlCon)
+writeLines(paste0('   }else{'), outputFileHtmlCon)
+writeLines(paste0("      document.getElementById('mapNotes').innerHTML = '<h3>Map Notes</h3>'+facts[majorChanges[animMajorChangesYear].mapYear];"), outputFileHtmlCon)
+writeLines(paste0('   }'), outputFileHtmlCon)  
+
+writeLines(paste0("  document.getElementById('urbanExtentMapYear').innerHTML = majorChanges[animMajorChangesYear].geojsonUrbanGrowthYear;"), outputFileHtmlCon)
+writeLines(paste0("  if(majorChanges[animMajorChangesYear].mapYear>=1929){"), outputFileHtmlCon)
+writeLines(paste0("    ue='Urban Extent '+majorChanges[animMajorChangesYear].geojsonUrbanGrowthYear;"), outputFileHtmlCon)
+writeLines(paste0("    ue=ue.trim();"), outputFileHtmlCon)
+writeLines(paste0("    ro='';"), outputFileHtmlCon)
+writeLines(paste0("    ro=majorChanges[animMajorChangesYear].geojsonMajorChangesYear+' All Routes';"), outputFileHtmlCon)
+writeLines(paste0("    ro=ro.trim();"), outputFileHtmlCon)
+writeLines(paste0("    // loop through the choices in the Leaflet control, they may be out of order, depending on how they loaded"), outputFileHtmlCon)
+writeLines(paste0("    for(cc = 1;cc<controlChoices.length;cc=cc+1){"), outputFileHtmlCon)
+writeLines(paste0("      cchoice=controlChoices[cc].labels[0].innerText;"), outputFileHtmlCon)
+writeLines(paste0("      cchoice=cchoice.trim();"), outputFileHtmlCon) 
+writeLines(paste0("      if(ro===cchoice){"), outputFileHtmlCon)
+writeLines(paste0("        clickChoice(controlChoices[cc]);"), outputFileHtmlCon)
+writeLines(paste0("      }"), outputFileHtmlCon)
+writeLines(paste0("      if(ue===cchoice){"), outputFileHtmlCon)
+writeLines(paste0("        clickChoice(controlChoices[cc]);"), outputFileHtmlCon)
+writeLines(paste0("      }"), outputFileHtmlCon)
+writeLines(paste0("    }"), outputFileHtmlCon)
+writeLines(paste0("  }"), outputFileHtmlCon)
+writeLines(paste0("}"), outputFileHtmlCon)
+
+writeLines(paste0("</script>"), outputFileHtmlCon)
+
+writeLines(paste0('<table>'), outputFileHtmlCon)
+writeLines(paste0('<tr><td valign=top>'), outputFileHtmlCon)
+writeLines(paste0('     <h3>Urban Extent Only Map</h3>'), outputFileHtmlCon)
+writeLines(paste0('     <h3>Urban Extent: <div id="urbanExtentMapYear">All</div></h3>'), outputFileHtmlCon)
+writeLines(paste0('     <input type="button" onClick="stepAnimate(1);" value="Animation - Forward in time."><br>'), outputFileHtmlCon)
+writeLines(paste0('     <input type="button" onClick="stepAnimate(-1);" value="Animation - Backward in time."><br>'), outputFileHtmlCon)
+writeLines(paste0('  </td>'), outputFileHtmlCon)
+writeLines(paste0('  <td valign=bottom>'), outputFileHtmlCon)
+writeLines(paste0('     <input type="button" onClick="unClickAll();" value="un-check all"><br>'), outputFileHtmlCon)
+writeLines(paste0('     <input type="button" onClick="clickAll();" value="check all"><br>'), outputFileHtmlCon)
+writeLines(paste0('  </td>'), outputFileHtmlCon)
+writeLines(paste0('  <td valign=top>'), outputFileHtmlCon)
+writeLines(paste0('     <h3>Major Changes in the Mass Transit Map</h3>'), outputFileHtmlCon)
+writeLines(paste0('     <h3>Map year: <div id="mapYear">All</div></h3>'), outputFileHtmlCon)
+writeLines(paste0('     <input type="button" onClick="stepAnimateMajorChanges(1);" value="Major Change Animation - Forward in time."><br>'), outputFileHtmlCon)
+writeLines(paste0('     <input type="button" onClick="stepAnimateMajorChanges(-1);" value="Major Change Animation - Backward in time.">'), outputFileHtmlCon)
+writeLines(paste0('</td></tr>'), outputFileHtmlCon)
+writeLines(paste0('</table>'), outputFileHtmlCon)
+writeLines(paste0('<p>'), outputFileHtmlCon)
+writeLines(paste0('<p><div id="mapNotes"></div></p>'), outputFileHtmlCon)
+writeLines(paste0('<p>This map takes more than a minute to load. When "1986 All Routes" appears in the map control panel in the top left of the map, loading is complete. '), outputFileHtmlCon)
+writeLines(paste0(' Due to the loading time, this map is slow to operate. Click the button "Major Change Animation - Forward In Time" to see changes in the extent of the mass transit network.'), outputFileHtmlCon)
+writeLines(paste0('</p>'), outputFileHtmlCon)
+writeLines(paste0(''), outputFileHtmlCon)
+writeLines(paste0('</p>'), outputFileHtmlCon)
+writeLines(paste0('<p>'), outputFileHtmlCon)
+writeLines(paste0(' A major change missing from this map is the O-Train in 2001.'), outputFileHtmlCon)
+writeLines(paste0('</p>'), outputFileHtmlCon)
+genHTMLPageLinks(outputFileHtmlCon,pageLinks)
+
+writeLines(paste0("<hr>"), outputFileHtmlCon)
+genHTMLFootnotes(outputFileHtmlCon,9999)
+writeLines(paste0("</body>"), outputFileHtmlCon)
+writeLines(paste0("</html>"), outputFileHtmlCon)
+close(outputFileHtmlCon)
+
+
 
 #--------------------------------------------
 # index page
@@ -921,3 +1275,52 @@ writeLines(paste0("<hr>"), outputFileHtmlCon)
 writeLines(paste0("</body>"), outputFileHtmlCon)
 writeLines(paste0("</html>"), outputFileHtmlCon)
 close(outputFileHtmlCon)
+
+
+
+#--------------------------------------------
+# Timeline page
+#--------------------------------------------
+rmariadb.db<-"oc_transpo_maps"
+routesDb<-dbConnect(RMariaDB::MariaDB(),default.file=rmariadb.settingsfile,group=rmariadb.db) 
+outputFileHtml <- paste0("C:\\a_orgs\\carleton\\hist3814\\R\\oc-transpo-maps-data\\output\\timeline.html")
+outputFileHtmlCon<-file(outputFileHtml, open = "w")
+genMapHTMLTop(outputFileHtmlCon, "Ottawa Mass Transit Routes Timeline 1929-2015")
+writeLines(paste0("<h1>Ottawa Mass Transit Routes Timeline 1929-2015</h1>"), outputFileHtmlCon)
+writeLines(paste0('<table>'), outputFileHtmlCon)
+writeLines(paste0("<tr><td><span style='text-align:left'><p>Year - Note</p></span></td><td><p>Map</p></td></tr>"), outputFileHtmlCon)
+output_query_facts<-paste0("SELECT fact,footnote_number,fact_year,fact_map_year_start,fact_map_year_end FROM oc_transpo_maps.tbl_facts WHERE true ORDER BY fact_map_year_start, fact_year;")
+output_rs_facts = dbSendQuery(routesDb,output_query_facts)
+output_dbRows_facts<-dbFetch(output_rs_facts, 999999)
+if (nrow(output_dbRows_facts)==0){
+  print (paste0("Zero rows for timeline"))
+  dbClearResult(output_rs_facts)
+} else {
+  timeLineYear=0
+  timeLineMapYear=0
+  for (i_facts in 1:nrow(output_dbRows_facts)) {
+    if(timeLineMapYear!=output_dbRows_facts[i_facts, 4]){
+      if(timeLineMapYear==0){
+        writeLines(paste0("<tr><td><span style='text-align:left'>"), outputFileHtmlCon)
+      }else{
+        writeLines(paste0('</span></ul></td><td><a href="',timeLineMapYear,'.html">',timeLineMapYear," Map</a></td></tr><tr><td align='left'><span style='text-align:left'>"), outputFileHtmlCon)
+      }
+    }
+    timeLineMapYear=output_dbRows_facts[i_facts, 4]
+    if(timeLineYear!=output_dbRows_facts[i_facts, 3]){
+      writeLines(paste0("</ul><p><b>",output_dbRows_facts[i_facts, 3],":</b></p><ul><span style='text-align:left'>"), outputFileHtmlCon)
+    }
+    timeLineYear=output_dbRows_facts[i_facts, 3]
+    writeLines(paste0("<li><p>",output_dbRows_facts[i_facts, 1],' <a href="#footnote',output_dbRows_facts[i_facts, 2],'"><sup>',output_dbRows_facts[i_facts, 2],'</sup></a></p></li>'), outputFileHtmlCon)
+  }
+  writeLines(paste0('</span></ul></td><td><a href="',timeLineMapYear,'.html">',timeLineMapYear," Map</a></td></tr>"), outputFileHtmlCon)
+  dbClearResult(output_rs_facts)
+}
+writeLines(paste0('</table>'), outputFileHtmlCon)
+genHTMLPageLinks(outputFileHtmlCon,pageLinks)
+writeLines(paste0("<hr>"), outputFileHtmlCon)
+genHTMLFootnotes(outputFileHtmlCon,9999)
+writeLines(paste0("</body>"), outputFileHtmlCon)
+writeLines(paste0("</html>"), outputFileHtmlCon)
+close(outputFileHtmlCon)
+dbDisconnect(routesDb)
