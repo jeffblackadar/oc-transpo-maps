@@ -185,10 +185,13 @@ Converted columns
 to
 
 "CMA_name","CMA_no","prov_name","prov_no","county_census_div","mun_subdiv","mun","mun_size","rural_urban_size","met_area","CT","auto_none","auto_one","auto_two"
+
 ```
+
 ###1971
 Canadian Census 1971 Profile Tables - Tract Level
 
+```
 "COL0","CMA name"
 "COL1","CMA no"
 "COL2","Census Tract name"
@@ -200,11 +203,10 @@ Canadian Census 1971 Profile Tables - Tract Level
 "COL8","Dwellings with one automobile"
 "COL9","Dwellings with two or more automobiles"
 
-"CMA_name","CMA_no","CT","population","D19001945","D19461960","D19611970","D1971","auto_one","auto_two"
+to 
 
-###1981
-http://dc1.chass.utoronto.ca.proxy.library.carleton.ca/census/1981/index.html
-1981 Census / Recensement 
+"CMA_name","CMA_no","CT","population","D19001945","D19461960","D19611970","D1971","auto_one","auto_two"
+```
 
 
 ## Census map files
@@ -217,6 +219,10 @@ UBC Library has scanned and digitized the 1951 census boundary maps found in Sta
 Thanks to the data Services and GIS staff at UBC Library: Tom Brittnacher and Paul Lesack.
 
 ### Eastview and Rockcliffe
+
+```
 They both have a CT of 0, but the auto data does not.
 40    35  0           Eastview Town     1      40
 41    35  0 Rockcliffe Park Village     1      41
+```
+
