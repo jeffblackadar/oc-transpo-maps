@@ -155,6 +155,7 @@ The National Capital Commission created a series of GIS files show urban growth 
 Maps of this project use a specific year of the urban growth data to show the extent of urbanization during the time mass transit was operating. The program [oc_2_urban_growth_geojson.r](https://github.com/jeffblackadar/oc-transpo-maps/blob/master/oc_2_urban_growth_geojson.r) splits up the urban growth data into geojson files for specific years between 1927 - 2012.
 
 # Census data
+### 1961
 http://dc1.chass.utoronto.ca.proxy.library.carleton.ca/census/1961_ct.html
 
 1. Select the Census Metropolitan Area
@@ -188,7 +189,7 @@ to
 
 ```
 
-###1971
+### 1971
 Canadian Census 1971 Profile Tables - Tract Level
 
 ```
